@@ -32,15 +32,19 @@
       <div class="container">
         <h2>业绩曲线（Base = 100）</h2>
         <p class="lede">
-          数据来自 <code>data/performance.json</code>。建议你维护“基金净值（单位净值）”，并用它来画累计收益率：
-          <code>(NAV / 100 - 1)</code>。
+          当前图表直接嵌入自 Google Sheets（pubchart）。如需替换数据，请在 Google Sheet 里更新图表或更换 iframe 链接。
         </p>
 
-        <div class="chart-box" style="margin-top:16px;">
-          <canvas id="perfChart" aria-label="Performance chart" role="img"></canvas>
+        <!-- Google Sheets Chart -->
+        <div class="chart-box" style="margin-top:16px; display:flex; justify-content:center;">
+          <iframe
+            title="Oval Fund Performance Chart"
+            style="width:min(100%, 980px); height:520px; border:0;"
+            frameborder="0"
+            scrolling="no"
+            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRUp8_9ElnRsBMWZjjLaTgu8VuuncRIFzeP-stIqz2wAThTD76cJTdQ-4kX2kGnKArYsglrM9OuLiQT/pubchart?oid=367663612&amp;format=interactive">
+          </iframe>
         </div>
-
-        <div id="perfStats" class="stats" style="margin-top:14px;"></div>
 
         <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
           <a class="btn" href="index.html">返回首页</a>
@@ -50,12 +54,19 @@
         <div class="card" style="margin-top:18px;">
           <h3 style="margin-top:0;">如何更新数据（最简单）</h3>
           <ol class="list">
-            <li><span>打开</span> <code>data/performance.json</code>，把示例数据替换成你的真实数据。</li>
-            <li>保持字段：<code>date</code>（YYYY-MM-DD）、<code>fund</code>、<code>sp500</code>、<code>brk</code>（都用 Base=100 的净值）。</li>
-            <li>提交到 GitHub，Pages 会自动更新。</li>
+            <li>
+              <span>打开对应的 Google Sheets，更新数据/图表。</span>
+            </li>
+            <li>
+              <span>确保该图表仍然是“已发布（Published）”状态，并且 pubchart 链接可访问。</span>
+            </li>
+            <li>
+              <span>如果你换了图表或新建了图表，把本页 iframe 的 <code>src</code> 链接替换成新的 pubchart 链接即可。</span>
+            </li>
           </ol>
+
           <p class="note" style="margin-top:10px;">
-            如果你后续要自动更新：可以用脚本每天生成 JSON（或 CSV），再用 GitHub Actions 定时提交。
+            说明：本页不再使用 <code>data/performance.json</code> 与 Chart.js 绘图（已改为直接嵌入 Google 图表）。
           </p>
         </div>
       </div>
@@ -68,8 +79,6 @@
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script src="assets/js/site.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('year').textContent = new Date().getFullYear();
