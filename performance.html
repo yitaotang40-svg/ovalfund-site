@@ -4,8 +4,47 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Oval Fund | Performance</title>
-  <meta name="description" content="Performance chart (from performance.csv) for Fund vs benchmarks." />
+  <meta name="description" content="Performance (from performance.csv) with cashflow markers." />
   <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <!-- 只在本页用到的小样式：入金表格 + embed 模式 -->
+  <style>
+    .cf-table-wrap { overflow:auto; }
+    .cf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .cf-table th, .cf-table td {
+      padding: 10px 8px;
+      border-top: 1px solid rgba(0,0,0,.08);
+      vertical-align: top;
+    }
+    .cf-table th {
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: .06em;
+      opacity: .7;
+      border-top: none;
+    }
+    .cf-amt { text-align: right; white-space: nowrap; }
+    .cf-sum {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: .8;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* embed=1 或 iframe 内嵌：隐藏头尾/按钮，只显示图表主体 */
+    body.embed .site-header,
+    body.embed .footer,
+    body.embed .page-actions { display:none !important; }
+    body.embed main { padding-top: 0 !important; }
+    body.embed .section { padding-top: 0 !important; border-top: none !important; }
+  </style>
 </head>
 
 <body>
@@ -30,12 +69,11 @@
   <main>
     <section class="section" style="border-top:none;">
       <div class="container">
-        <h2>业绩曲线（基于你的资金进出 / 份额制）</h2>
+        <h2>业绩曲线（Base = 100）</h2>
 
         <p class="lede">
-          本页从 <code>data/performance.csv</code> 读取数据：优先使用 <code>Share Price</code> 作为基金净值；
-          若没有 <code>Share Price</code>，会自动用 <code>Total / Shares</code> 计算净值。
-          基准使用 <code>SP500</code> 与 <code>BRK</code>（自动转成 Base=100 后再画累计收益率%）。
+          数据来自 <code>data/performance.csv</code>（基金用 <code>Share Price</code> 作为单位净值；基准用 <code>SP500</code> / <code>BRK</code>）。
+          图中竖虚线为入金时间（Transfer）。
         </p>
 
         <div class="note" style="margin-top:10px;">
@@ -47,7 +85,7 @@
           <canvas id="perfChart" aria-label="Performance chart" role="img"></canvas>
         </div>
 
-        <!-- KPI 卡片（自动填充） -->
+        <!-- KPI -->
         <div class="stats" style="margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
           <div class="card" style="padding:14px 16px;">
             <div style="font-size:12px; letter-spacing:.06em; opacity:.75;">SINCE START</div>
@@ -67,32 +105,18 @@
           </div>
         </div>
 
-        <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="page-actions" style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
           <a class="btn" href="index.html">返回首页</a>
           <a class="btn primary" href="index.html#contact">获取完整材料</a>
         </div>
 
+        <!-- 入金列表 -->
         <div class="card" style="margin-top:18px;">
-          <h3 style="margin-top:0;">如何更新数据（最简单）</h3>
-          <ol class="list">
-            <li>
-              <span>把你这张表导出/复制为 CSV，保存到仓库：</span>
-              <code>data/performance.csv</code>
-            </li>
-            <li>
-              <span>CSV 至少要包含以下列名（其他列可以保留不影响）：</span>
-              <code>Date</code>、
-              <code>Share Price</code>（或 <code>Total</code> + <code>Shares</code>）、
-              <code>SP500</code>、
-              <code>BRK</code>
-            </li>
-            <li>
-              <span>提交到 GitHub，Pages 会自动更新。</span>
-            </li>
-          </ol>
-          <p class="note" style="margin-top:10px;">
-            小提示：如果你发现 CSV 里数字带千分位逗号导致列错位，请确保导出的是“纯数字”（Excel/Sheets 一般会自动处理）。
+          <h3 style="margin-top:0;">入金记录（Transfer）</h3>
+          <p class="note" style="margin-top:6px;">
+            说明：以下入金来自你截图里的 IB 交易流水（Amount 列）。累计入金 = 26,996.94，与你的 Net Transfer 总额一致。
           </p>
+          <div id="cashflowList" class="cf-table-wrap" style="margin-top:10px;"></div>
         </div>
       </div>
     </section>
@@ -104,15 +128,35 @@
     </div>
   </main>
 
-  <!-- Chart.js -->
+  <!-- Chart.js + 时间轴适配器（用于在非数据点日期画入金竖线） -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3" defer></script>
 
-  <!-- Page script -->
   <script defer>
     (() => {
       const DATA_URL = 'data/performance.csv';
 
+      // 你给的入金时间（来自截图 Transfer / Amount）
+      const CASHFLOWS = [
+        { date: '2025-09-08', amount: 3697.00 },
+        { date: '2025-09-23', amount: 4919.43 },
+        { date: '2025-09-25', amount: 6671.00 },
+        { date: '2025-09-26', amount:  329.67 },
+        { date: '2025-10-09', amount: 3768.24 },
+        { date: '2025-11-05', amount: 1611.60 },
+        { date: '2026-01-26', amount: 2000.00 },
+        { date: '2026-01-27', amount: 2000.00 },
+        { date: '2026-02-02', amount: 2000.00 },
+      ];
+
       const el = (id) => document.getElementById(id);
+
+      function setEmbedModeIfNeeded() {
+        const params = new URLSearchParams(window.location.search);
+        const embed = params.get('embed') === '1';
+        const inIframe = (() => { try { return window.self !== window.top; } catch { return true; } })();
+        if (embed || inIframe) document.body.classList.add('embed');
+      }
 
       function parseCSV(text) {
         const rows = [];
@@ -142,7 +186,6 @@
         return rows.filter(r => r.some(v => String(v).trim() !== ''));
       }
 
-      // ✅ 加固1：去掉可能存在的 BOM
       function normalizeHeader(h) {
         return String(h || '')
           .replace(/^\uFEFF/, '')
@@ -173,11 +216,13 @@
         const str = String(s || '').trim();
         if (!str) return null;
 
+        // YYYY-MM-DD
         if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) {
           const [y, m, d] = str.split('-').map(n => parseInt(n, 10));
           return new Date(Date.UTC(y, m - 1, d));
         }
 
+        // M/D/YYYY
         if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
           const [m, d, y] = str.split('/').map(n => parseInt(n, 10));
           return new Date(Date.UTC(y, m - 1, d));
@@ -202,9 +247,14 @@
         return `${sign}${(x * 100).toFixed(decimals)}%`;
       }
 
+      function money(x) {
+        if (!Number.isFinite(x)) return '—';
+        return '$' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
       function computeMaxDrawdown(indexSeries) {
         let peak = -Infinity;
-        let maxDD = 0;
+        let maxDD = 0; // 负数
         for (const v of indexSeries) {
           if (!Number.isFinite(v)) continue;
           if (v > peak) peak = v;
@@ -218,7 +268,6 @@
 
       function returnOverDays(dates, indexSeries, days) {
         if (!dates.length || dates.length !== indexSeries.length) return NaN;
-
         const lastIdx = dates.length - 1;
         const lastDate = dates[lastIdx];
         const targetMs = lastDate.getTime() - days * 24 * 60 * 60 * 1000;
@@ -234,7 +283,40 @@
         return v1 / v0 - 1;
       }
 
+      function renderCashflows() {
+        const total = CASHFLOWS.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+        const rows = CASHFLOWS
+          .slice()
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .map(x => `
+            <tr>
+              <td>${x.date}</td>
+              <td class="cf-amt">${money(x.amount)}</td>
+            </tr>
+          `).join('');
+
+        el('cashflowList').innerHTML = `
+          <table class="cf-table" aria-label="Cashflow table">
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th class="cf-amt">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="cf-sum">
+            <div>次数：<b>${CASHFLOWS.length}</b></div>
+            <div>累计入金：<b>${money(total)}</b></div>
+          </div>
+        `;
+      }
+
       async function loadAndRender() {
+        setEmbedModeIfNeeded();
+        renderCashflows();
+
         el('year').textContent = new Date().getFullYear();
 
         const status = el('dataStatus');
@@ -262,51 +344,34 @@
 
         const idxDate = findCol(headers, ['Date', '日期']);
         const idxSharePrice = findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
-        const idxTotal = findCol(headers, ['Total', '总资产', '净值']);
-        const idxShares = findCol(headers, ['Shares', '份额', 'Units']);
         const idxSP = findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
         const idxBRK = findCol(headers, ['BRK', 'BRK.B', 'BRK B', 'BRK Price']);
 
         if (idxDate === -1) { setStatus('缺少 Date 列。'); return; }
+        if (idxSharePrice === -1) { setStatus('缺少 Share Price 列。'); return; }
         if (idxSP === -1) { setStatus('缺少 SP500 列。'); return; }
         if (idxBRK === -1) { setStatus('缺少 BRK 列。'); return; }
-        if (idxSharePrice === -1 && (idxTotal === -1 || idxShares === -1)) {
-          setStatus('缺少 Share Price；也没找到 Total + Shares（无法计算基金净值）。');
-          return;
-        }
 
         const dates = [];
-        const fundPrice = [];
-        const spValue = [];
-        const brkValue = [];
+        const fund = [];
+        const sp = [];
+        const brk = [];
 
         for (let i = 1; i < rows.length; i++) {
           const r = rows[i];
-
           const d = parseDateValue(r[idxDate]);
           if (!d) continue;
 
-          const sp = parseNumber(r[idxSP]);
-          const brk = parseNumber(r[idxBRK]);
-          if (!Number.isFinite(sp) || !Number.isFinite(brk)) continue;
+          const f = parseNumber(r[idxSharePrice]);
+          const s = parseNumber(r[idxSP]);
+          const b = parseNumber(r[idxBRK]);
 
-          let fund = NaN;
-          if (idxSharePrice !== -1) fund = parseNumber(r[idxSharePrice]);
-
-          if (!Number.isFinite(fund) && idxTotal !== -1 && idxShares !== -1) {
-            const total = parseNumber(r[idxTotal]);
-            const shares = parseNumber(r[idxShares]);
-            if (Number.isFinite(total) && Number.isFinite(shares) && shares !== 0) {
-              fund = total / shares;
-            }
-          }
-
-          if (!Number.isFinite(fund)) continue;
+          if (!Number.isFinite(f) || !Number.isFinite(s) || !Number.isFinite(b)) continue;
 
           dates.push(d);
-          fundPrice.push(fund);
-          spValue.push(sp);
-          brkValue.push(brk);
+          fund.push(f);
+          sp.push(s);
+          brk.push(b);
         }
 
         if (dates.length < 2) {
@@ -314,57 +379,86 @@
           return;
         }
 
+        // 按日期升序
         const order = dates.map((d, i) => ({ t: d.getTime(), i }))
                            .sort((a, b) => a.t - b.t)
                            .map(o => o.i);
 
-        const datesS = order.map(i => dates[i]);
-        const fundS  = order.map(i => fundPrice[i]);
-        const spS    = order.map(i => spValue[i]);
-        const brkS   = order.map(i => brkValue[i]);
+        const dS = order.map(i => dates[i]);
+        const fS = order.map(i => fund[i]);
+        const sS = order.map(i => sp[i]);
+        const bS = order.map(i => brk[i]);
 
-        const baseFund = fundS[0];
-        const baseSP   = spS[0];
-        const baseBRK  = brkS[0];
+        // Base=100 index
+        const baseF = fS[0];
+        const baseS = sS[0];
+        const baseB = bS[0];
 
-        const fundIndex = fundS.map(v => (v / baseFund) * 100);
-        const spIndex   = spS.map(v => (v / baseSP) * 100);
-        const brkIndex  = brkS.map(v => (v / baseBRK) * 100);
+        const fundIndex = fS.map(v => (v / baseF) * 100);
+        const spIndex   = sS.map(v => (v / baseS) * 100);
+        const brkIndex  = bS.map(v => (v / baseB) * 100);
 
         const fundRet = fundIndex.map(v => v - 100);
         const spRet   = spIndex.map(v => v - 100);
         const brkRet  = brkIndex.map(v => v - 100);
 
+        // KPI
         const sinceStart = fundIndex[fundIndex.length - 1] / 100 - 1;
-        const r1m = returnOverDays(datesS, fundIndex, 30);
-        const r3m = returnOverDays(datesS, fundIndex, 90);
-        const maxDD = computeMaxDrawdown(fundIndex);
+        const r1m = returnOverDays(dS, fundIndex, 30);
+        const r3m = returnOverDays(dS, fundIndex, 90);
+        const mdd = computeMaxDrawdown(fundIndex);
 
         el('kpiSince').textContent = fmtPct(sinceStart);
         el('kpi1m').textContent = fmtPct(r1m);
         el('kpi3m').textContent = fmtPct(r3m);
-        el('kpiMdd').textContent = fmtPct(maxDD);
+        el('kpiMdd').textContent = fmtPct(mdd);
 
-        const lastIso = formatISODate(datesS[datesS.length - 1]);
-        el('lastDate').textContent = lastIso;
-        setStatus(`已加载 ${datesS.length} 条记录`);
+        el('lastDate').textContent = formatISODate(dS[dS.length - 1]);
+        setStatus(`已加载 ${dS.length} 条记录`);
 
-        const labels = datesS.map(formatISODate);
+        // 入金竖线插件（time scale 下可画在任意日期）
+        const cashflowLinesPlugin = {
+          id: 'cashflowLines',
+          afterDatasetsDraw(chart) {
+            const { ctx, chartArea, scales } = chart;
+            const x = scales.x;
+            if (!x || !chartArea) return;
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1;
+
+            for (const cf of CASHFLOWS) {
+              const t = new Date(cf.date + 'T00:00:00Z');
+              const px = x.getPixelForValue(t);
+              if (!Number.isFinite(px)) continue;
+              if (px < chartArea.left || px > chartArea.right) continue;
+
+              ctx.beginPath();
+              ctx.moveTo(px, chartArea.top);
+              ctx.lineTo(px, chartArea.bottom);
+              ctx.stroke();
+            }
+
+            ctx.restore();
+          }
+        };
+
+        const seriesFund = dS.map((d, i) => ({ x: d, y: fundRet[i] }));
+        const seriesSP   = dS.map((d, i) => ({ x: d, y: spRet[i] }));
+        const seriesBRK  = dS.map((d, i) => ({ x: d, y: brkRet[i] }));
+
         const canvas = el('perfChart');
-
-        if (window.__perfChart) {
-          window.__perfChart.destroy();
-          window.__perfChart = null;
-        }
+        if (window.__perfChart) { window.__perfChart.destroy(); window.__perfChart = null; }
 
         window.__perfChart = new Chart(canvas, {
           type: 'line',
           data: {
-            labels,
             datasets: [
-              { label: 'Fund',    data: fundRet, borderColor: '#2563eb', borderWidth: 2, pointRadius: 0, tension: 0.25 },
-              { label: 'S&P 500', data: spRet,   borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.25 },
-              { label: 'BRK',     data: brkRet,  borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0, tension: 0.25 }
+              { label: 'Fund',    data: seriesFund, borderColor: '#2563eb', borderWidth: 2, pointRadius: 0, tension: 0.25 },
+              { label: 'S&P 500', data: seriesSP,   borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.25 },
+              { label: 'BRK',     data: seriesBRK,  borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0, tension: 0.25 }
             ]
           },
           options: {
@@ -380,11 +474,17 @@
               }
             },
             scales: {
-              x: { ticks: { maxTicksLimit: 8 } },
-              // ✅ 加固2：y轴两位小数
-              y: { ticks: { callback: (v) => `${Number(v).toFixed(2)}%` } }
+              x: {
+                type: 'time',
+                time: { unit: 'week' },
+                ticks: { maxTicksLimit: 8 }
+              },
+              y: {
+                ticks: { callback: (v) => `${Number(v).toFixed(2)}%` }
+              }
             }
-          }
+          },
+          plugins: [cashflowLinesPlugin]
         });
       }
 
