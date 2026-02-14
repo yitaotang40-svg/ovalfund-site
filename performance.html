@@ -7,37 +7,7 @@
   <meta name="description" content="Performance (from performance.csv) with cashflow markers." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 
-  <!-- 只在本页用到的小样式：入金表格 + embed 模式 -->
   <style>
-    .cf-table-wrap { overflow:auto; }
-    .cf-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    .cf-table th, .cf-table td {
-      padding: 10px 8px;
-      border-top: 1px solid rgba(0,0,0,.08);
-      vertical-align: top;
-    }
-    .cf-table th {
-      text-align: left;
-      font-size: 12px;
-      letter-spacing: .06em;
-      opacity: .7;
-      border-top: none;
-    }
-    .cf-amt { text-align: right; white-space: nowrap; }
-    .cf-sum {
-      margin-top: 10px;
-      font-size: 13px;
-      opacity: .8;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
     /* embed=1 或 iframe 内嵌：隐藏头尾/按钮，只显示图表主体 */
     body.embed .site-header,
     body.embed .footer,
@@ -110,7 +80,7 @@
           <a class="btn primary" href="index.html#contact">获取完整材料</a>
         </div>
 
-       
+      </div>
     </section>
 
     <div class="footer">
@@ -126,7 +96,20 @@
 
   <script defer>
     (() => {
+      const DATA_URL = 'data/performance.csv';
 
+      // 入金时间（用于画竖虚线；不再显示表格）
+      const CASHFLOWS = [
+        { date: '2025-09-08', amount: 3697.00 },
+        { date: '2025-09-23', amount: 4919.43 },
+        { date: '2025-09-25', amount: 6671.00 },
+        { date: '2025-09-26', amount:  329.67 },
+        { date: '2025-10-09', amount: 3768.24 },
+        { date: '2025-11-05', amount: 1611.60 },
+        { date: '2026-01-26', amount: 2000.00 },
+        { date: '2026-01-27', amount: 2000.00 },
+        { date: '2026-02-02', amount: 2000.00 },
+      ];
 
       const el = (id) => document.getElementById(id);
 
@@ -226,11 +209,6 @@
         return `${sign}${(x * 100).toFixed(decimals)}%`;
       }
 
-      function money(x) {
-        if (!Number.isFinite(x)) return '—';
-        return '$' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
-
       function computeMaxDrawdown(indexSeries) {
         let peak = -Infinity;
         let maxDD = 0; // 负数
@@ -262,40 +240,8 @@
         return v1 / v0 - 1;
       }
 
-      function renderCashflows() {
-        const total = CASHFLOWS.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-
-        const rows = CASHFLOWS
-          .slice()
-          .sort((a, b) => a.date.localeCompare(b.date))
-          .map(x => `
-            <tr>
-              <td>${x.date}</td>
-              <td class="cf-amt">${money(x.amount)}</td>
-            </tr>
-          `).join('');
-
-        el('cashflowList').innerHTML = `
-          <table class="cf-table" aria-label="Cashflow table">
-            <thead>
-              <tr>
-                <th>DATE</th>
-                <th class="cf-amt">AMOUNT</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-          <div class="cf-sum">
-            <div>次数：<b>${CASHFLOWS.length}</b></div>
-            <div>累计入金：<b>${money(total)}</b></div>
-          </div>
-        `;
-      }
-
       async function loadAndRender() {
         setEmbedModeIfNeeded();
-        renderCashflows();
-
         el('year').textContent = new Date().getFullYear();
 
         const status = el('dataStatus');
