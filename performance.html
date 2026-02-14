@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oval Fund | Performance</title>
+  <meta name="description" content="Performance chart (base=100) for Fund vs benchmarks." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="navbar">
+        <a class="brand" href="index.html">
+          <span>Oval Fund</span>
+          <small>Performance</small>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="index.html#philosophy">理念</a>
+          <a href="index.html#letters">投资人信</a>
+          <a href="index.html#contact">联系</a>
+          <a class="active" href="performance.html">业绩</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" style="border-top:none;">
+      <div class="container">
+        <h2>业绩曲线（Base = 100）</h2>
+        <p class="lede">
+          数据来自 <code>data/performance.json</code>。建议你维护“基金净值（单位净值）”，并用它来画累计收益率：
+          <code>(NAV / 100 - 1)</code>。
+        </p>
+
+        <div class="chart-box" style="margin-top:16px;">
+          <canvas id="perfChart" aria-label="Performance chart" role="img"></canvas>
+        </div>
+
+        <div id="perfStats" class="stats" style="margin-top:14px;"></div>
+
+        <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn" href="index.html">返回首页</a>
+          <a class="btn primary" href="index.html#contact">获取完整材料</a>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3 style="margin-top:0;">如何更新数据（最简单）</h3>
+          <ol class="list">
+            <li><span>打开</span> <code>data/performance.json</code>，把示例数据替换成你的真实数据。</li>
+            <li>保持字段：<code>date</code>（YYYY-MM-DD）、<code>fund</code>、<code>sp500</code>、<code>brk</code>（都用 Base=100 的净值）。</li>
+            <li>提交到 GitHub，Pages 会自动更新。</li>
+          </ol>
+          <p class="note" style="margin-top:10px;">
+            如果你后续要自动更新：可以用脚本每天生成 JSON（或 CSV），再用 GitHub Actions 定时提交。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div class="container">
+        <div>© <span id="year"></span> Oval Fund. All rights reserved.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('year').textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>
