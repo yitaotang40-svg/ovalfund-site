@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Oval Fund | Performance</title>
-  <meta name="description" content="Performance chart (base=100) for Fund vs benchmarks." />
+  <meta name="description" content="Performance chart (from performance.csv) for Fund vs benchmarks." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 
@@ -30,20 +30,41 @@
   <main>
     <section class="section" style="border-top:none;">
       <div class="container">
-        <h2>业绩曲线（Base = 100）</h2>
+        <h2>业绩曲线（基于你的资金进出 / 份额制）</h2>
+
         <p class="lede">
-          当前图表直接嵌入自 Google Sheets（pubchart）。如需替换数据，请在 Google Sheet 里更新图表或更换 iframe 链接。
+          本页从 <code>data/performance.csv</code> 读取数据：优先使用 <code>Share Price</code> 作为基金净值；
+          若没有 <code>Share Price</code>，会自动用 <code>Total / Shares</code> 计算净值。
+          基准使用 <code>SP500</code> 与 <code>BRK</code>（自动转成 Base=100 后再画累计收益率%）。
         </p>
 
-        <!-- Google Sheets Chart -->
-        <div class="chart-box" style="margin-top:16px; display:flex; justify-content:center;">
-          <iframe
-            title="Oval Fund Performance Chart"
-            style="width:min(100%, 980px); height:520px; border:0;"
-            frameborder="0"
-            scrolling="no"
-            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRUp8_9ElnRsBMWZjjLaTgu8VuuncRIFzeP-stIqz2wAThTD76cJTdQ-4kX2kGnKArYsglrM9OuLiQT/pubchart?oid=367663612&amp;format=interactive">
-          </iframe>
+        <div class="note" style="margin-top:10px;">
+          <b>数据状态：</b><span id="dataStatus">—</span>
+          <span style="margin-left:10px;">（最新日期：<span id="lastDate">—</span>）</span>
+        </div>
+
+        <div class="chart-box" style="margin-top:16px; height:420px;">
+          <canvas id="perfChart" aria-label="Performance chart" role="img"></canvas>
+        </div>
+
+        <!-- KPI 卡片（自动填充） -->
+        <div class="stats" style="margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+          <div class="card" style="padding:14px 16px;">
+            <div style="font-size:12px; letter-spacing:.06em; opacity:.75;">SINCE START</div>
+            <div id="kpiSince" style="margin-top:6px; font-size:22px; font-weight:700;">—</div>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <div style="font-size:12px; letter-spacing:.06em; opacity:.75;">~ 1M</div>
+            <div id="kpi1m" style="margin-top:6px; font-size:22px; font-weight:700;">—</div>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <div style="font-size:12px; letter-spacing:.06em; opacity:.75;">~ 3M</div>
+            <div id="kpi3m" style="margin-top:6px; font-size:22px; font-weight:700;">—</div>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <div style="font-size:12px; letter-spacing:.06em; opacity:.75;">MAX DRAWDOWN</div>
+            <div id="kpiMdd" style="margin-top:6px; font-size:22px; font-weight:700;">—</div>
+          </div>
         </div>
 
         <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -55,18 +76,22 @@
           <h3 style="margin-top:0;">如何更新数据（最简单）</h3>
           <ol class="list">
             <li>
-              <span>打开对应的 Google Sheets，更新数据/图表。</span>
+              <span>把你这张表导出/复制为 CSV，保存到仓库：</span>
+              <code>data/performance.csv</code>
             </li>
             <li>
-              <span>确保该图表仍然是“已发布（Published）”状态，并且 pubchart 链接可访问。</span>
+              <span>CSV 至少要包含以下列名（其他列可以保留不影响）：</span>
+              <code>Date</code>、
+              <code>Share Price</code>（或 <code>Total</code> + <code>Shares</code>）、
+              <code>SP500</code>、
+              <code>BRK</code>
             </li>
             <li>
-              <span>如果你换了图表或新建了图表，把本页 iframe 的 <code>src</code> 链接替换成新的 pubchart 链接即可。</span>
+              <span>提交到 GitHub，Pages 会自动更新。</span>
             </li>
           </ol>
-
           <p class="note" style="margin-top:10px;">
-            说明：本页不再使用 <code>data/performance.json</code> 与 Chart.js 绘图（已改为直接嵌入 Google 图表）。
+            小提示：如果你发现 CSV 里数字带千分位逗号导致列错位，请确保导出的是“纯数字”（Excel/Sheets 一般会自动处理）。
           </p>
         </div>
       </div>
@@ -79,10 +104,298 @@
     </div>
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('year').textContent = new Date().getFullYear();
-    });
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+
+  <!-- Page script -->
+  <script defer>
+    (() => {
+      const DATA_URL = 'data/performance.csv'; // 你把CSV放到这个路径
+
+      const el = (id) => document.getElementById(id);
+
+      function parseCSV(text) {
+        // 轻量 CSV 解析（支持双引号、逗号分隔）
+        const rows = [];
+        let row = [];
+        let field = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+          const c = text[i];
+
+          if (inQuotes) {
+            if (c === '"') {
+              if (text[i + 1] === '"') { field += '"'; i++; }
+              else { inQuotes = false; }
+            } else {
+              field += c;
+            }
+          } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+            else if (c === '\r') { /* ignore */ }
+            else { field += c; }
+          }
+        }
+        if (field.length || row.length) { row.push(field); rows.push(row); }
+        return rows.filter(r => r.some(v => String(v).trim() !== ''));
+      }
+
+      function normalizeHeader(h) {
+        return String(h || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      }
+
+      function findCol(headers, candidates) {
+        const map = headers.map(normalizeHeader);
+        for (const cand of candidates) {
+          const idx = map.indexOf(normalizeHeader(cand));
+          if (idx !== -1) return idx;
+        }
+        return -1;
+      }
+
+      function parseNumber(v) {
+        if (v == null) return NaN;
+        const s = String(v).trim();
+        if (!s) return NaN;
+        // 去掉 %、$、千分位逗号、空格
+        const cleaned = s.replace(/[%$]/g, '').replace(/,/g, '').replace(/\s+/g, '');
+        const num = Number(cleaned);
+        return Number.isFinite(num) ? num : NaN;
+      }
+
+      function parseDateValue(s) {
+        const str = String(s || '').trim();
+        if (!str) return null;
+
+        // YYYY-MM-DD
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(str)) {
+          const [y, m, d] = str.split('-').map(n => parseInt(n, 10));
+          return new Date(Date.UTC(y, m - 1, d));
+        }
+
+        // M/D/YYYY 或 MM/DD/YYYY
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+          const [m, d, y] = str.split('/').map(n => parseInt(n, 10));
+          return new Date(Date.UTC(y, m - 1, d));
+        }
+
+        // fallback
+        const t = Date.parse(str);
+        if (!Number.isFinite(t)) return null;
+        const d = new Date(t);
+        return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+      }
+
+      function formatISODate(d) {
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${dd}`;
+      }
+
+      function fmtPct(x, decimals = 2) {
+        if (!Number.isFinite(x)) return '—';
+        const sign = x > 0 ? '+' : '';
+        return `${sign}${(x * 100).toFixed(decimals)}%`;
+      }
+
+      function computeMaxDrawdown(indexSeries) {
+        let peak = -Infinity;
+        let maxDD = 0; // 负数
+        for (const v of indexSeries) {
+          if (!Number.isFinite(v)) continue;
+          if (v > peak) peak = v;
+          if (peak > 0) {
+            const dd = v / peak - 1;
+            if (dd < maxDD) maxDD = dd;
+          }
+        }
+        return maxDD;
+      }
+
+      function returnOverDays(dates, indexSeries, days) {
+        if (!dates.length || dates.length !== indexSeries.length) return NaN;
+
+        const lastIdx = dates.length - 1;
+        const lastDate = dates[lastIdx];
+        const targetMs = lastDate.getTime() - days * 24 * 60 * 60 * 1000;
+
+        let anchor = 0;
+        for (let i = lastIdx; i >= 0; i--) {
+          if (dates[i].getTime() <= targetMs) { anchor = i; break; }
+        }
+
+        const v0 = indexSeries[anchor];
+        const v1 = indexSeries[lastIdx];
+        if (!Number.isFinite(v0) || !Number.isFinite(v1) || v0 === 0) return NaN;
+        return v1 / v0 - 1;
+      }
+
+      async function loadAndRender() {
+        // footer year
+        el('year').textContent = new Date().getFullYear();
+
+        const status = el('dataStatus');
+        const setStatus = (msg) => { if (status) status.textContent = msg; };
+        setStatus('正在加载…');
+
+        let text = '';
+        try {
+          const res = await fetch(DATA_URL, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          text = await res.text();
+        } catch (err) {
+          console.error(err);
+          setStatus(`加载失败：无法访问 ${DATA_URL}`);
+          return;
+        }
+
+        const rows = parseCSV(text);
+        if (rows.length < 2) {
+          setStatus('数据为空或 CSV 格式不正确（至少需要表头 + 1 行）。');
+          return;
+        }
+
+        const headers = rows[0];
+
+        const idxDate = findCol(headers, ['Date', '日期']);
+        const idxSharePrice = findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
+        const idxTotal = findCol(headers, ['Total', '总资产', '净值']);
+        const idxShares = findCol(headers, ['Shares', '份额', 'Units']);
+        const idxSP = findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
+        const idxBRK = findCol(headers, ['BRK', 'BRK.B', 'BRK B', 'BRK Price']);
+
+        if (idxDate === -1) { setStatus('缺少 Date 列。'); return; }
+        if (idxSP === -1) { setStatus('缺少 SP500 列。'); return; }
+        if (idxBRK === -1) { setStatus('缺少 BRK 列。'); return; }
+        if (idxSharePrice === -1 && (idxTotal === -1 || idxShares === -1)) {
+          setStatus('缺少 Share Price；也没找到 Total + Shares（无法计算基金净值）。');
+          return;
+        }
+
+        const dates = [];
+        const fundPrice = [];
+        const spValue = [];
+        const brkValue = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+
+          const d = parseDateValue(r[idxDate]);
+          if (!d) continue;
+
+          const sp = parseNumber(r[idxSP]);
+          const brk = parseNumber(r[idxBRK]);
+          if (!Number.isFinite(sp) || !Number.isFinite(brk)) continue;
+
+          let fund = NaN;
+          if (idxSharePrice !== -1) fund = parseNumber(r[idxSharePrice]);
+
+          // 如果没提供 Share Price，就用 Total / Shares 算
+          if (!Number.isFinite(fund) && idxTotal !== -1 && idxShares !== -1) {
+            const total = parseNumber(r[idxTotal]);
+            const shares = parseNumber(r[idxShares]);
+            if (Number.isFinite(total) && Number.isFinite(shares) && shares !== 0) {
+              fund = total / shares;
+            }
+          }
+
+          if (!Number.isFinite(fund)) continue;
+
+          dates.push(d);
+          fundPrice.push(fund);
+          spValue.push(sp);
+          brkValue.push(brk);
+        }
+
+        if (dates.length < 2) {
+          setStatus('有效数据行太少（需要至少 2 行）。');
+          return;
+        }
+
+        // 按日期升序排序
+        const order = dates.map((d, i) => ({ t: d.getTime(), i }))
+                           .sort((a, b) => a.t - b.t)
+                           .map(o => o.i);
+
+        const datesS = order.map(i => dates[i]);
+        const fundS  = order.map(i => fundPrice[i]);
+        const spS    = order.map(i => spValue[i]);
+        const brkS   = order.map(i => brkValue[i]);
+
+        // 统一转成 Base=100 的 index
+        const baseFund = fundS[0];
+        const baseSP   = spS[0];
+        const baseBRK  = brkS[0];
+
+        const fundIndex = fundS.map(v => (v / baseFund) * 100);
+        const spIndex   = spS.map(v => (v / baseSP) * 100);
+        const brkIndex  = brkS.map(v => (v / baseBRK) * 100);
+
+        // 画累计收益率（%）
+        const fundRet = fundIndex.map(v => v - 100);
+        const spRet   = spIndex.map(v => v - 100);
+        const brkRet  = brkIndex.map(v => v - 100);
+
+        // KPI
+        const sinceStart = fundIndex[fundIndex.length - 1] / 100 - 1;
+        const r1m = returnOverDays(datesS, fundIndex, 30);
+        const r3m = returnOverDays(datesS, fundIndex, 90);
+        const maxDD = computeMaxDrawdown(fundIndex);
+
+        el('kpiSince').textContent = fmtPct(sinceStart);
+        el('kpi1m').textContent = fmtPct(r1m);
+        el('kpi3m').textContent = fmtPct(r3m);
+        el('kpiMdd').textContent = fmtPct(maxDD);
+
+        const lastIso = formatISODate(datesS[datesS.length - 1]);
+        el('lastDate').textContent = lastIso;
+        setStatus(`已加载 ${datesS.length} 条记录`);
+
+        // 画图
+        const labels = datesS.map(formatISODate);
+        const canvas = el('perfChart');
+
+        if (window.__perfChart) {
+          window.__perfChart.destroy();
+          window.__perfChart = null;
+        }
+
+        window.__perfChart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Fund',   data: fundRet, borderColor: '#2563eb', borderWidth: 2, pointRadius: 0, tension: 0.25 },
+              { label: 'S&P 500',data: spRet,   borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.25 },
+              { label: 'BRK',    data: brkRet,  borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0, tension: 0.25 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'top' },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { maxTicksLimit: 8 } },
+              y: { ticks: { callback: (v) => `${v}%` } }
+            }
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', loadAndRender);
+    })();
   </script>
 </body>
 </html>
