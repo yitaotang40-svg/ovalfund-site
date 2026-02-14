@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Oval Fund | Performance</title>
-  <meta name="description" content="Performance (from performance.csv), percent return only." />
+  <meta name="description" content="Performance (from performance.csv): return% + fund NAV price." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 
   <style>
-    /* embed=1 或 iframe 内嵌：隐藏头尾/按钮，只显示图表主体 */
+    /* embed=1 或 iframe 内嵌：隐藏头尾/按钮，只显示主体 */
     body.embed .site-header,
     body.embed .footer,
     body.embed .page-actions { display:none !important; }
@@ -39,11 +39,12 @@
   <main>
     <section class="section" style="border-top:none;">
       <div class="container">
-        <h2>业绩曲线（Base = 100）</h2>
+        <h2>业绩（收益率% + 基金净值$）</h2>
 
         <p class="lede">
-          数据来自 <code>data/performance.csv</code>（Fund 使用 <code>Share Price</code>，基准使用 <code>SP500</code> / <code>BRK</code>）。
-          图表仅展示累计收益率（%）。
+          数据来自 <code>data/performance.csv</code>：
+          <strong>上图</strong>为累计收益率（%）对比基准；
+          <strong>下图</strong>为基金净值/价格（Share Price，$）。
         </p>
 
         <div class="note" style="margin-top:10px;">
@@ -51,13 +52,13 @@
           <span style="margin-left:10px;">（最新日期：<span id="lastDate">—</span>）</span>
         </div>
 
-        <!-- 这里专门显示你要的“起始净值=100” -->
         <div class="note" id="navInfo" style="margin-top:6px;">
           —
         </div>
 
-        <div class="chart-box" style="margin-top:16px; height:420px;">
-          <canvas id="perfChart" aria-label="Performance chart" role="img"></canvas>
+        <!-- Chart 1: Return % -->
+        <div class="chart-box" style="margin-top:16px; height:380px;">
+          <canvas id="retChart" aria-label="Return chart" role="img"></canvas>
         </div>
 
         <!-- KPI -->
@@ -80,11 +81,21 @@
           </div>
         </div>
 
+        <!-- Chart 2: Fund NAV ($) -->
+        <div class="card" style="margin-top:18px;">
+          <h3 style="margin-top:0;">Fund 净值/价格（$）</h3>
+          <p class="note" style="margin-top:6px;">
+            这里显示的是 <code>Share Price</code>（单位净值/价格）。起始值应为 <strong>$100.00</strong>。
+          </p>
+          <div class="chart-box" style="margin-top:12px; height:320px;">
+            <canvas id="navChart" aria-label="Fund NAV chart" role="img"></canvas>
+          </div>
+        </div>
+
         <div class="page-actions" style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
           <a class="btn" href="index.html">返回首页</a>
           <a class="btn primary" href="index.html#contact">获取完整材料</a>
         </div>
-
       </div>
     </section>
 
@@ -251,7 +262,7 @@
           return;
         }
 
-        const dates=[], fund=[], sp=[], brk=[];
+        const dates=[], fundPrice=[], sp=[], brk=[];
         for (let i=1;i<rows.length;i++){
           const r = rows[i];
           const d = parseDateValue(r[idxDate]);
@@ -259,26 +270,30 @@
           const s = parseNumber(r[idxSP]);
           const b = parseNumber(r[idxBRK]);
           if (!d || !Number.isFinite(f) || !Number.isFinite(s) || !Number.isFinite(b)) continue;
-          dates.push(d); fund.push(f); sp.push(s); brk.push(b);
+          dates.push(d); fundPrice.push(f); sp.push(s); brk.push(b);
         }
         if (dates.length < 2) { setStatus('有效数据太少'); return; }
 
         // sort
         const order = dates.map((d,i)=>({t:d.getTime(),i})).sort((a,b)=>a.t-b.t).map(o=>o.i);
         const dS = order.map(i=>dates[i]);
-        const fS = order.map(i=>fund[i]);
+        const fS = order.map(i=>fundPrice[i]);
         const sS = order.map(i=>sp[i]);
         const bS = order.map(i=>brk[i]);
 
         const baseF = fS[0], baseS=sS[0], baseB=bS[0];
+
+        // index (Base=100)
         const fundIndex = fS.map(v => (v/baseF)*100);
         const spIndex   = sS.map(v => (v/baseS)*100);
         const brkIndex  = bS.map(v => (v/baseB)*100);
 
+        // returns (% points)
         const fundRet = fundIndex.map(v=>v-100);
         const spRet   = spIndex.map(v=>v-100);
         const brkRet  = brkIndex.map(v=>v-100);
 
+        // KPI (based on fundIndex)
         const sinceStart = fundIndex.at(-1)/100 - 1;
         const r1m = returnOverDays(dS, fundIndex, 30);
         const r3m = returnOverDays(dS, fundIndex, 90);
@@ -294,14 +309,15 @@
         el('lastDate').textContent = lastDate;
         setStatus(`已加载 ${dS.length} 条记录`);
 
-        // ✅ 这里显示你要的“起始=100”以及最新净值
+        // 显示起始/最新“基金价格”
         el('navInfo').textContent =
-          `起始净值（股价）: ${fmtMoney(baseF)}（${startDate}）  |  最新净值: ${fmtMoney(fS.at(-1))}（${lastDate}）`;
+          `Fund 起始净值（价格）: ${fmtMoney(baseF)}（${startDate}）  |  最新净值: ${fmtMoney(fS.at(-1))}（${lastDate}）`;
 
         const labels = dS.map(formatISODate);
 
-        if (window.__perfChart) window.__perfChart.destroy();
-        window.__perfChart = new Chart(el('perfChart'), {
+        // Chart 1: Return %
+        if (window.__retChart) window.__retChart.destroy();
+        window.__retChart = new Chart(el('retChart'), {
           type: 'line',
           data: {
             labels,
@@ -317,11 +333,47 @@
             interaction:{ mode:'index', intersect:false },
             plugins:{
               legend:{ position:'top' },
-              tooltip:{ callbacks:{ label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%` } }
+              tooltip:{
+                callbacks:{
+                  // Fund 显示“价格 + 收益率%”
+                  label: (ctx) => {
+                    const i = ctx.dataIndex;
+                    if (ctx.dataset.label === 'Fund') {
+                      return `Fund: ${fmtMoney(fS[i])}  (${ctx.parsed.y.toFixed(2)}%)`;
+                    }
+                    return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`;
+                  }
+                }
+              }
             },
             scales:{
               x:{ ticks:{ maxTicksLimit:8 } },
               y:{ ticks:{ callback:(v)=>`${Number(v).toFixed(2)}%` } }
+            }
+          }
+        });
+
+        // Chart 2: Fund NAV ($)
+        if (window.__navChart) window.__navChart.destroy();
+        window.__navChart = new Chart(el('navChart'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label:'Fund NAV ($)', data: fS, borderColor:'#2563eb', borderWidth:2, pointRadius:0, tension:0.25 }
+            ]
+          },
+          options: {
+            responsive:true,
+            maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
+            plugins:{
+              legend:{ position:'top' },
+              tooltip:{ callbacks:{ label:(ctx)=>`Fund NAV: ${fmtMoney(ctx.parsed.y)}` } }
+            },
+            scales:{
+              x:{ ticks:{ maxTicksLimit:8 } },
+              y:{ ticks:{ callback:(v)=>`$${Number(v).toFixed(2)}` } }
             }
           }
         });
