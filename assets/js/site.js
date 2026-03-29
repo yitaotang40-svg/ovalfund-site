@@ -1,264 +1,489 @@
-/* Oval Fund static site starter
-   - Active nav highlight
-   - Investor letter browser + filters
-   - Performance chart (Chart.js) from /data/performance.json
-*/
-
-function q(sel, el=document){ return el.querySelector(sel); }
-function qa(sel, el=document){ return Array.from(el.querySelectorAll(sel)); }
-
-function formatPct(x){
-  if (x === null || x === undefined || Number.isNaN(x)) return "—";
-  const sign = x > 0 ? "+" : "";
-  return sign + x.toFixed(2) + "%";
+function q(selector, scope = document) {
+  return scope.querySelector(selector);
 }
 
-function parseISODate(s){
-  // Expect YYYY-MM-DD
-  const [y,m,d] = s.split("-").map(Number);
-  return new Date(y, (m||1)-1, d||1);
+function qa(selector, scope = document) {
+  return Array.from(scope.querySelectorAll(selector));
 }
 
-function setupActiveNav(){
+function setYear() {
+  qa('[data-year]').forEach((node) => {
+    node.textContent = new Date().getFullYear();
+  });
+}
+
+function setupActiveNav() {
   const links = qa('.nav-links a[href^="#"]');
+  if (!links.length || document.body.classList.contains('performance-page')) {
+    return;
+  }
+
   const sections = links
-    .map(a => ({ a, id: a.getAttribute('href').slice(1) }))
-    .map(x => ({ ...x, el: document.getElementById(x.id) }))
-    .filter(x => x.el);
+    .map((link) => ({ link, id: link.getAttribute('href').slice(1) }))
+    .map((item) => ({ ...item, section: document.getElementById(item.id) }))
+    .filter((item) => item.section);
 
-  if (!sections.length) return;
+  if (!sections.length) {
+    return;
+  }
 
-  const setActive = (id) => {
-    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+id));
+  const activate = (currentId) => {
+    links.forEach((link) => {
+      link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
+    });
   };
 
   const onScroll = () => {
-    const top = window.scrollY + 90; // header offset
+    const top = window.scrollY + 120;
     let current = sections[0].id;
-    for (const s of sections){
-      if (s.el.offsetTop <= top) current = s.id;
-    }
-    setActive(current);
+
+    sections.forEach((item) => {
+      if (item.section.offsetTop <= top) {
+        current = item.id;
+      }
+    });
+
+    activate(current);
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 }
 
-async function loadLetters(){
-  const grid = q('#lettersGrid');
-  if (!grid) return;
-
-  const yearPills = qa('[data-filter="year"] .pill');
-  const quarterPills = qa('[data-filter="quarter"] .pill');
-
-  let letters = [];
-  try {
-    const res = await fetch('content/letters.json', { cache: 'no-store' });
-    letters = await res.json();
-  } catch (e){
-    grid.innerHTML = `<div class="note">Unable to load letters.json. Check that <code>content/letters.json</code> exists.</div>`;
+function setupRevealAnimations() {
+  const items = qa('[data-reveal]');
+  if (!items.length) {
     return;
   }
 
-  // normalize
-  letters = letters
-    .map(x => ({
-      ...x,
-      year: Number(x.year),
-      quarter: String(x.quarter || '').toUpperCase(),
-      dateObj: parseISODate(x.date || '1970-01-01')
-    }))
-    .sort((a,b) => b.dateObj - a.dateObj);
+  if (!('IntersectionObserver' in window)) {
+    items.forEach((item) => item.classList.add('is-visible'));
+    return;
+  }
 
-  let state = { year: 'all', quarter: 'all' };
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.15,
+      rootMargin: '0px 0px -60px 0px'
+    }
+  );
 
-  const setPills = () => {
-    yearPills.forEach(p => p.classList.toggle('active', p.dataset.value === state.year));
-    quarterPills.forEach(p => p.classList.toggle('active', p.dataset.value === state.quarter));
-  };
+  items.forEach((item, index) => {
+    item.style.transitionDelay = `${Math.min(index * 40, 180)}ms`;
+    observer.observe(item);
+  });
+}
 
-  const render = () => {
-    const filtered = letters.filter(x => {
-      const yOk = (state.year === 'all') || (String(x.year) === state.year);
-      const qOk = (state.quarter === 'all') || (x.quarter === state.quarter);
-      return yOk && qOk;
-    });
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
 
-    if (!filtered.length){
-      grid.innerHTML = `<div class="note">No letters match the current filters.</div>`;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (text[index + 1] === '"') {
+          field += '"';
+          index += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ',') {
+      row.push(field);
+      field = '';
+    } else if (char === '\n') {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else if (char !== '\r') {
+      field += char;
+    }
+  }
+
+  if (field.length || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows.filter((line) => line.some((value) => String(value).trim() !== ''));
+}
+
+function normalizeHeader(header) {
+  return String(header || '')
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function findCol(headers, candidates) {
+  const normalizedHeaders = headers.map(normalizeHeader);
+  for (const candidate of candidates) {
+    const index = normalizedHeaders.indexOf(normalizeHeader(candidate));
+    if (index !== -1) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function parseNumber(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) {
+    return Number.NaN;
+  }
+
+  const cleaned = raw.replace(/[%$,]/g, '').replace(/\s+/g, '');
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
+}
+
+function parseDateValue(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(raw)) {
+    const [year, month, day] = raw.split('-').map((part) => parseInt(part, 10));
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) {
+    const [month, day, year] = raw.split('/').map((part) => parseInt(part, 10));
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  const timestamp = Date.parse(raw);
+  if (!Number.isFinite(timestamp)) {
+    return null;
+  }
+
+  const date = new Date(timestamp);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function formatISODate(date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateCN(date) {
+  return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
+}
+
+function formatPct(decimal, digits = 2) {
+  if (!Number.isFinite(decimal)) {
+    return '—';
+  }
+
+  const sign = decimal > 0 ? '+' : '';
+  return `${sign}${(decimal * 100).toFixed(digits)}%`;
+}
+
+function formatMoney(value) {
+  if (!Number.isFinite(value)) {
+    return '—';
+  }
+  return `$${value.toFixed(2)}`;
+}
+
+function computeMaxDrawdown(indexSeries) {
+  let peak = -Infinity;
+  let maxDrawdown = 0;
+
+  indexSeries.forEach((value) => {
+    if (!Number.isFinite(value)) {
       return;
     }
 
-    grid.innerHTML = filtered.map(x => {
-      const meta = `${x.year} · ${x.quarter} · ${x.date || ''}`.replace(' · ', ' | ');
-      const cover = x.coverUrl || 'assets/img/letter-placeholder.svg';
-      const href = x.pdfUrl || '#';
-      const safeTitle = (x.title || 'Investor Letter').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      const safeSummary = (x.summary || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-      return `
-        <a class="letter-card" href="${href}" target="_blank" rel="noopener">
-          <img src="${cover}" alt="${safeTitle}">
-          <div class="body">
-            <div class="meta">${meta}</div>
-            <div class="title">${safeTitle}</div>
-            <div class="desc">${safeSummary}</div>
-          </div>
-        </a>
-      `;
-    }).join('');
-  };
-
-  yearPills.forEach(p => p.addEventListener('click', () => { state.year = p.dataset.value; setPills(); render(); }));
-  quarterPills.forEach(p => p.addEventListener('click', () => { state.quarter = p.dataset.value; setPills(); render(); }));
-
-  setPills();
-  render();
-}
-
-function computePerf(series, base){
-  const toPct = (nav) => (nav / base - 1) * 100;
-  const out = series.map(d => ({
-    date: d.date,
-    fund: toPct(d.fund),
-    sp500: toPct(d.sp500),
-    brk: toPct(d.brk),
-    fundNav: d.fund
-  }));
-  return out;
-}
-
-function calcSimpleReturn(navStart, navEnd){
-  if (!navStart || !navEnd) return null;
-  return (navEnd / navStart - 1) * 100;
-}
-
-function maxDrawdown(navSeries){
-  let peak = -Infinity;
-  let maxDd = 0;
-  for (const v of navSeries){
-    if (v > peak) peak = v;
-    const dd = (v / peak - 1) * 100;
-    if (dd < maxDd) maxDd = dd;
-  }
-  return maxDd;
-}
-
-async function loadPerformance(){
-  const canvasFull = q('#perfChart');
-  const canvasMini = q('#perfMini');
-  const statsBox = q('#perfStats');
-
-  if (!canvasFull && !canvasMini) return;
-
-  if (typeof Chart === 'undefined'){
-    console.warn('Chart.js not loaded. Add Chart.js <script> before assets/js/site.js');
-    return;
-  }
-
-  let payload;
-  try {
-    const res = await fetch('data/performance.json', { cache: 'no-store' });
-    payload = await res.json();
-  } catch(e){
-    const target = canvasFull || canvasMini;
-    if (target && target.parentElement){
-      target.parentElement.innerHTML = `<div class="note">Unable to load <code>data/performance.json</code>.</div>`;
+    if (value > peak) {
+      peak = value;
     }
+
+    if (peak > 0) {
+      const drawdown = value / peak - 1;
+      if (drawdown < maxDrawdown) {
+        maxDrawdown = drawdown;
+      }
+    }
+  });
+
+  return maxDrawdown;
+}
+
+function returnOverDays(dates, indexSeries, days) {
+  const lastIndex = dates.length - 1;
+  const targetTime = dates[lastIndex].getTime() - days * 86400000;
+  let anchor = 0;
+
+  for (let index = lastIndex; index >= 0; index -= 1) {
+    if (dates[index].getTime() <= targetTime) {
+      anchor = index;
+      break;
+    }
+  }
+
+  const start = indexSeries[anchor];
+  const end = indexSeries[lastIndex];
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start === 0) {
+    return Number.NaN;
+  }
+
+  return end / start - 1;
+}
+
+function fillField(attribute, value) {
+  qa(`[${attribute}]`).forEach((node) => {
+    node.textContent = value;
+  });
+}
+
+function renderPreviewChart(labels, fundRet, spRet, brkRet) {
+  const canvas = q('#perfMini');
+  if (!canvas || typeof Chart === 'undefined') {
     return;
   }
 
-  const base = payload.base || 100;
-  const series = Array.isArray(payload.series) ? payload.series : [];
-  if (!series.length) return;
-
-  const perf = computePerf(series, base);
-
-  // compute basic stats from NAV
-  const nav = series.map(d => d.fund);
-  const latest = nav[nav.length-1];
-  const start = nav[0];
-
-  const rSince = calcSimpleReturn(start, latest);
-  const r4 = nav.length >= 5 ? calcSimpleReturn(nav[nav.length-5], latest) : null; // ~1 month if weekly
-  const r12 = nav.length >= 13 ? calcSimpleReturn(nav[nav.length-13], latest) : null; // ~3 months
-  const dd = maxDrawdown(nav);
-
-  if (statsBox){
-    statsBox.innerHTML = `
-      <div class="stat"><div class="k">Since start</div><div class="v">${formatPct(rSince)}</div></div>
-      <div class="stat"><div class="k">~1M</div><div class="v">${formatPct(r4)}</div></div>
-      <div class="stat"><div class="k">~3M</div><div class="v">${formatPct(r12)}</div></div>
-      <div class="stat"><div class="k">Max drawdown</div><div class="v">${formatPct(dd)}</div></div>
-    `;
+  if (window.__ovalPreviewChart) {
+    window.__ovalPreviewChart.destroy();
   }
 
-  const buildChart = (canvas, points, title) => {
-    const ctx = canvas.getContext('2d');
+  const styles = getComputedStyle(document.documentElement);
+  const accent = styles.getPropertyValue('--accent').trim() || '#133a66';
+  const accentTwo = styles.getPropertyValue('--accent-2').trim() || '#c28f43';
+  const accentThree = styles.getPropertyValue('--accent-3').trim() || '#7b9ab8';
 
-    const labels = points.map(d => d.date);
-    const dataset = (key, label, borderColor) => ({
-      label,
-      data: points.map(d => d[key]),
-      borderColor,
-      backgroundColor: 'transparent',
-      tension: 0.25,
-      borderWidth: 2,
-      pointRadius: 0
-    });
-
-    return new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          dataset('fund', 'Fund', '#2457ff'),
-          dataset('sp500', 'S&P 500', '#ef4444'),
-          dataset('brk', 'BRK', '#ffb000')
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          title: { display: !!title, text: title },
-          legend: { display: true, position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${formatPct(ctx.parsed.y)}`
-            }
+  window.__ovalPreviewChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Fund',
+          data: fundRet,
+          borderColor: accent,
+          backgroundColor: 'transparent',
+          borderWidth: 2.4,
+          pointRadius: 0,
+          tension: 0.28
+        },
+        {
+          label: 'S&P 500',
+          data: spRet,
+          borderColor: accentThree,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.28
+        },
+        {
+          label: 'BRK',
+          data: brkRet,
+          borderColor: accentTwo,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.28
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 14,
+            color: '#3b4756'
           }
         },
-        scales: {
-          y: {
-            ticks: {
-              callback: (v) => v + '%'
-            },
-            grid: { color: '#eef0f5' }
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: 5,
+            color: '#66707d'
           },
-          x: {
-            ticks: { maxTicksLimit: 8 },
-            grid: { display: false }
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          ticks: {
+            color: '#66707d',
+            callback(value) {
+              return `${Number(value).toFixed(0)}%`;
+            }
+          },
+          grid: {
+            color: 'rgba(16, 24, 32, 0.08)'
           }
         }
       }
-    });
-  };
+    }
+  });
+}
 
-  if (canvasMini){
-    const slice = perf.slice(Math.max(0, perf.length - 14)); // last ~3 months weekly
-    buildChart(canvasMini, slice, '');
+async function loadHomePerformance() {
+  const needsPerformance =
+    q('#perfMini') ||
+    qa('[data-perf-since]').length ||
+    qa('[data-perf-nav]').length ||
+    qa('[data-perf-mdd]').length ||
+    qa('[data-perf-date]').length ||
+    qa('[data-perf-date-long]').length ||
+    qa('[data-perf-quarter]').length ||
+    qa('[data-perf-benchmark]').length ||
+    qa('[data-perf-status]').length;
+
+  if (!needsPerformance) {
+    return;
   }
 
-  if (canvasFull){
-    buildChart(canvasFull, perf, '');
+  fillField('data-perf-status', '正在加载业绩数据...');
+
+  try {
+    const response = await fetch('data/performance.csv', { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const rows = parseCSV(await response.text());
+    if (rows.length < 2) {
+      throw new Error('CSV is empty');
+    }
+
+    const headers = rows[0];
+    const idxDate = findCol(headers, ['Date', '日期']);
+    const idxSharePrice = findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
+    const idxSP = findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
+    const idxBRK = findCol(headers, ['BRK', 'BRK.B', 'BRK B']);
+
+    if ([idxDate, idxSharePrice, idxSP, idxBRK].some((index) => index === -1)) {
+      throw new Error('Missing required columns');
+    }
+
+    const dates = [];
+    const fundPrice = [];
+    const sp = [];
+    const brk = [];
+
+    for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
+      const row = rows[rowIndex];
+      const date = parseDateValue(row[idxDate]);
+      const fund = parseNumber(row[idxSharePrice]);
+      const spValue = parseNumber(row[idxSP]);
+      const brkValue = parseNumber(row[idxBRK]);
+
+      if (!date || !Number.isFinite(fund) || !Number.isFinite(spValue) || !Number.isFinite(brkValue)) {
+        continue;
+      }
+
+      dates.push(date);
+      fundPrice.push(fund);
+      sp.push(spValue);
+      brk.push(brkValue);
+    }
+
+    if (dates.length < 2) {
+      throw new Error('Not enough usable rows');
+    }
+
+    const order = dates
+      .map((date, index) => ({ time: date.getTime(), index }))
+      .sort((left, right) => left.time - right.time)
+      .map((item) => item.index);
+
+    const orderedDates = order.map((index) => dates[index]);
+    const orderedFund = order.map((index) => fundPrice[index]);
+    const orderedSp = order.map((index) => sp[index]);
+    const orderedBrk = order.map((index) => brk[index]);
+
+    const baseFund = orderedFund[0];
+    const baseSp = orderedSp[0];
+    const baseBrk = orderedBrk[0];
+    const fundIndex = orderedFund.map((value) => (value / baseFund) * 100);
+    const spIndex = orderedSp.map((value) => (value / baseSp) * 100);
+    const brkIndex = orderedBrk.map((value) => (value / baseBrk) * 100);
+
+    const sinceStart = fundIndex.at(-1) / 100 - 1;
+    const quarter = returnOverDays(orderedDates, fundIndex, 90);
+    const maxDrawdown = computeMaxDrawdown(fundIndex);
+    const latestDate = orderedDates.at(-1);
+    const spSinceStart = spIndex.at(-1) / 100 - 1;
+    const brkSinceStart = brkIndex.at(-1) / 100 - 1;
+
+    fillField('data-perf-since', formatPct(sinceStart));
+    fillField('data-perf-quarter', formatPct(quarter));
+    fillField('data-perf-nav', formatMoney(orderedFund.at(-1)));
+    fillField('data-perf-mdd', formatPct(maxDrawdown));
+    fillField('data-perf-date', formatISODate(latestDate));
+    fillField('data-perf-date-long', formatDateCN(latestDate));
+    fillField(
+      'data-perf-benchmark',
+      `Since inception comparison: Fund ${formatPct(sinceStart)} · S&P 500 ${formatPct(spSinceStart)} · BRK ${formatPct(brkSinceStart)}`
+    );
+    fillField('data-perf-status', `已加载 ${orderedDates.length} 条记录，最新日期 ${formatISODate(latestDate)}`);
+
+    const labels = orderedDates.map((date) => formatISODate(date));
+    const fundRet = fundIndex.map((value) => value - 100);
+    const spRet = spIndex.map((value) => value - 100);
+    const brkRet = brkIndex.map((value) => value - 100);
+    renderPreviewChart(labels, fundRet, spRet, brkRet);
+  } catch (error) {
+    console.error(error);
+    fillField('data-perf-status', '业绩数据暂时不可用');
   }
 }
 
+window.OvalSite = {
+  parseCSV,
+  findCol,
+  parseNumber,
+  parseDateValue,
+  formatISODate,
+  formatDateCN,
+  formatPct,
+  formatMoney,
+  computeMaxDrawdown,
+  returnOverDays
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+  setYear();
   setupActiveNav();
-  loadLetters();
-  loadPerformance();
+  setupRevealAnimations();
+  loadHomePerformance();
 });

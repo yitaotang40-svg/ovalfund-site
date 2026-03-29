@@ -1,206 +1,553 @@
-<!doctype html> <html lang="zh-CN"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1" /> <title>Oval Fund</title> <meta name="description" content="Quantum-inspired, cycle-aware investing across the time dimension with structured strategies." /> <link rel="stylesheet" href="assets/css/styles.css" /> </head> <body> <header class="site-header"> <div class="container"> <div class="navbar"> <a class="brand" href="#"> <span>Oval Fund</span> <small>Quantum · Cross-Time</small> </a> <nav class="nav-links" aria-label="Primary"> <a href="#philosophy">理念</a> <a href="#structure">结构</a> <a href="#team">团队</a> <a href="#performance">业绩</a> <a href="#research">研究</a> <a href="#contact">联系</a> </nav> </div> </div> </header> <main> <section class="hero"> <div class="container"> <div class="kicker">Entering Oval Fund</div> <h1> Quantum<span class="dot">.</span> Temporal<span class="dot">.</span><br/> Cross-Time<span class="dot">.</span> Investing<span class="dot">.</span> </h1> <p> Oval Fund 是一个以“量子计算的并行概率视角”为灵感、跨越时间维度做投资的基金。我们把市场视为多条同时存在的概率路径：短期是噪声与波动，中期是再定价与均值回归，长期是现金流与复利。我们用多情景并行推演（“叠加”）评估分布，用结构化交易（“测量”）把观点压成可复盘的收益函数：不追逐行情，交易时间本身。 </p> <p class="note" style="margin-top:12px;"> 口号：<strong>把未来的概率波，折叠成今天的净值曲线。</strong> </p> <div class="hero-cta"> <a class="btn primary" href="#performance">查看业绩概览</a> <a class="btn" href="performance.html">查看业绩曲线</a> </div> </div> </section> <section id="philosophy" class="section"> <div class="container grid-2"> <div> <h2>投资理念</h2> <p class="lede"> 我们的优势不在“猜对下一根 K 线”，而在<strong>跨时间维度</strong>与<strong>经济周期</strong>的定价差： 长期看现金流与复利，中期等再定价与均值回归，短期用结构把波动率与时间价值写进收益函数。 换句话说：我们不追行情，交易时间本身。 </p> <p class="note" style="margin-top:10px;"> 我们把决策写成一个可复盘的“三步法”：先做<strong>情景叠加</strong>（把不同周期/估值/波动率路径当作一组“基底”，给每条路径一个权重；直觉上“权重平方才是概率”），再等<strong>信息测量</strong>（用新增数据更新每条路径的权重），最后用<strong>结构化交易</strong>把观点投影到收益曲线（先定义最大亏损与赔率）。 在表达上，我们也借鉴“六爻”那种<strong>用有限线索快速更新判断</strong>的方式——把它当作信息压缩与决策语言，而非神秘主义承诺。 </p> <h3>关键原则</h3> <ul class="list"> <li><strong>跨时间维度建仓：</strong>同一标的分短/中/长三套假设，避免把短期噪声当长期真相。</li> <li><strong>结构化表达观点：</strong>用 Calendar / Butterfly / Spread 把观点写进收益函数，先定义最大亏损，再谈潜在收益。</li> <li><strong>抓住经济周期：</strong>围绕利率、信用、盈利三条主线，在不同阶段切换暴露与对冲。</li> <li><strong>把波动率当资产：</strong>有时买波动，有时卖时间价值，不把“方向”当唯一答案。</li> <li><strong>风险是分布：</strong>用情景权重、相关性与回撤预算管理仓位，让风险可解释、可复盘。</li> </ul> </div> <div class="pills" style="margin-top:14px;"> <span class="pill active" style="cursor:default;">时间维度</span> <span class="pill active" style="cursor:default;">结构化策略</span> <span class="pill active" style="cursor:default;">周期框架</span> </div> </div> </section>
-</section>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oval Fund | Structured Convexity, Crisis Alpha, Absolute Return</title>
+  <meta
+    name="description"
+    content="Oval Fund is a structured, crisis-aware fund using options, volatility, and cross-asset overlays to pursue absolute returns with disciplined liquidity and risk management."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="home-page">
+  <div class="site-ambient" aria-hidden="true"></div>
 
-    <section id="structure" class="section">
-      <div class="container grid-2">
-        <div>
-          <h2>结构与合作方式</h2>
-          <p class="lede">
-            Oval Fund 采用清晰、透明且长期导向的合作方式。我们坚持在风险可控的前提下追求复利增长，并通过简明的费用结构保持管理人与合作方之间的利益一致。
+  <header class="site-header">
+    <div class="container">
+      <div class="navbar">
+        <a class="brand" href="index.html" aria-label="Oval Fund home">
+          <span class="brand-mark">O</span>
+          <span>
+            <strong>Oval Fund</strong>
+            <small>Structured Convexity</small>
+          </span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#philosophy">理念</a>
+          <a href="#strategy">策略</a>
+          <a href="#terms">条款</a>
+          <a href="#team">团队</a>
+          <a href="#performance">业绩</a>
+          <a href="#materials">材料</a>
+          <a href="#contact">联系</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="btn" href="performance.html">完整业绩页</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy" data-reveal>
+          <div class="eyebrow">Oval Fund · Crisis-Aware Absolute Return</div>
+          <h1>在危机与波动中，寻找更可控的非对称收益。</h1>
+          <p class="hero-lede">
+            Oval Fund 以危机凸性、事件驱动可选性、波动率结构和跨资产对冲为核心，试图在完整市场周期内追求绝对收益。
+            我们不把“押方向”当作唯一答案，而是通过结构化头寸先定义最大亏损，再保留赔率，把时间、波动率和流动性管理写进收益函数。
           </p>
 
-          <h3>合作要点</h3>
-          <ul class="list">
-            <li>资金形式：具体合作安排可根据实际情况沟通确定。</li>
-            <li>流动性：申赎频率与资金安排以双方约定为准。</li>
-            <li>费用：管理费为 0；当组合年化收益超过 6% 时，仅对超出 6% 基准的利润部分按 25% 计提业绩报酬。</li>
-            <li>报告：定期更新净值、回撤与组合说明材料，保持信息披露的持续性与透明度。</li>
-          </ul>
+          <div class="hero-tags">
+            <span class="tag">0% Management Fee</span>
+            <span class="tag">6% Hard Hurdle</span>
+            <span class="tag">Quarter-End Liquidity</span>
+            <span class="tag">Options + Macro Overlay</span>
+          </div>
+
+          <div class="hero-cta">
+            <a class="btn primary" href="#performance">查看业绩概览</a>
+            <a class="btn" href="performance.html">打开完整业绩页</a>
+          </div>
+
+          <div class="hero-disclaimer">
+            本页为 Oval Fund, L.P. 草案阶段的公开概览，仅用于介绍投资哲学、合作框架与页面展示效果。
+            页面中的内容不构成公开募集、收益承诺、本金保护承诺或投资建议。
+          </div>
+        </div>
+
+        <aside class="hero-panel glass-card" data-reveal>
+          <div class="panel-kicker">Indicative Snapshot</div>
+
+          <div class="metric-grid">
+            <div class="metric">
+              <span>最新净值</span>
+              <strong data-perf-nav>—</strong>
+            </div>
+            <div class="metric">
+              <span>成立以来</span>
+              <strong data-perf-since>—</strong>
+            </div>
+            <div class="metric">
+              <span>最大回撤</span>
+              <strong data-perf-mdd>—</strong>
+            </div>
+            <div class="metric">
+              <span>最新数据</span>
+              <strong data-perf-date>—</strong>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="term-stack">
+            <div class="term-item">
+              <span>Fee Geometry</span>
+              <strong>0% 管理费，6% annual hard hurdle 以上利润部分按 25% 计提业绩报酬。</strong>
+            </div>
+            <div class="term-item">
+              <span>Liquidity</span>
+              <strong>季度末赎回，通常需至少 65 日书面通知，并配套 gate、standstill 与 side pocket 机制。</strong>
+            </div>
+            <div class="term-item">
+              <span>Minimum</span>
+              <strong>初始最低认购额为 US$5,000，管理人可视具体情况豁免。</strong>
+            </div>
+          </div>
+
+          <div class="summary-note" data-perf-status>正在加载业绩数据...</div>
+          <a class="text-link" href="#terms">查看条款摘要</a>
+        </aside>
+      </div>
+
+      <div class="container overview-ribbon" data-reveal>
+        <div class="ribbon-card">
+          <span>核心口号</span>
+          <strong>“再一次又一次的金融危机中积累财富”</strong>
+        </div>
+        <div class="ribbon-card">
+          <span>策略表达</span>
+          <strong>期权结构、波动率期限结构、事件驱动与跨资产 overlay 的组合。</strong>
+        </div>
+        <div class="ribbon-card">
+          <span>适用对象</span>
+          <strong>优先面向符合 Accredited Investor 标准的特定潜在投资者沟通。</strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="philosophy" class="section">
+      <div class="container section-intro" data-reveal>
+        <div>
+          <div class="eyebrow">Investment Philosophy</div>
+          <h2>先处理分布，再处理叙事。</h2>
+        </div>
+        <p class="section-lede">
+          Oval Fund 的核心不是预测下一根 K 线，而是在市场最容易失真的时刻，仍然把风险、赔率和流动性讲清楚。
+          我们优先从回撤预算、期限结构、情景路径和执行纪律出发，再决定是否承担方向风险。
+        </p>
+      </div>
+
+      <div class="container thesis-grid">
+        <article class="thesis-card" data-reveal>
+          <div class="card-index">01</div>
+          <h3>先定义最大亏损，再讨论潜在收益</h3>
+          <p>
+            通过 spread、calendar、butterfly、protective overlay 等结构，先把坏结果写进头寸，再去争取右侧收益空间。
+          </p>
+        </article>
+
+        <article class="thesis-card" data-reveal>
+          <div class="card-index">02</div>
+          <h3>把波动率当资产，而不是噪音</h3>
+          <p>
+            市场的机会不只来自方向判断。隐含波动率、期限结构、skew 和相关性扭曲，本身就是可以被管理和定价的对象。
+          </p>
+        </article>
+
+        <article class="thesis-card" data-reveal>
+          <div class="card-index">03</div>
+          <h3>流动性先于表面净值</h3>
+          <p>
+            在极端环境下，避免被迫火售、保留组合完整性、保护存续投资者的公平性，往往比追求短期报表更重要。
+          </p>
+        </article>
+
+        <article class="thesis-card" data-reveal>
+          <div class="card-index">04</div>
+          <h3>危机是检验框架的时刻</h3>
+          <p>
+            我们不承诺危机中必然盈利，但会优先准备在失序时期仍能运作的交易结构、风控工具和流动性防火墙。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="strategy" class="section section-tone">
+      <div class="container section-intro" data-reveal>
+        <div>
+          <div class="eyebrow">Strategy Architecture</div>
+          <h2>用多模块协同，而不是用单一风格押注市场。</h2>
+        </div>
+        <p class="section-lede">
+          页面内容基于认购协议草案整理，突出目前最清晰的五个策略模块。
+          它们可以单独运行，也可以随着市场环境、波动率定价和风险预算动态叠加。
+        </p>
+      </div>
+
+      <div class="container strategy-grid">
+        <article class="strategy-card" data-reveal>
+          <div class="strategy-meta">Crisis Convexity</div>
+          <h3>危机凸性与尾部覆盖</h3>
+          <p>通过指数 put、put spread、calendar put 和定义风险结构，在急跌与波动率飙升时提升组合的非线性保护能力。</p>
+        </article>
+
+        <article class="strategy-card" data-reveal>
+          <div class="strategy-meta">Event-Driven Optionality</div>
+          <h3>事件驱动可选性</h3>
+          <p>围绕财报、监管、主题轮动与产业周期，用单名股票的 call、spread、diagonal 和 stock-option overlay 表达观点。</p>
+        </article>
+
+        <article class="strategy-card" data-reveal>
+          <div class="strategy-meta">Relative Value Volatility</div>
+          <h3>波动率相对价值</h3>
+          <p>利用前后月波动率差、skew 扭曲和局部曲率变化，在可测算风险预算内做期限结构和波动率相对价值交易。</p>
+        </article>
+
+        <article class="strategy-card" data-reveal>
+          <div class="strategy-meta">Cross-Asset Overlay</div>
+          <h3>跨资产宏观覆盖</h3>
+          <p>通过黄金、能源、利率敏感工具及数字资产代理工具，构建通胀、信用收缩、政策转向等情景下的 overlay。</p>
+        </article>
+
+        <article class="strategy-card" data-reveal>
+          <div class="strategy-meta">Tactical Beta &amp; Liquidity</div>
+          <h3>战术 Beta 与流动性袖口</h3>
+          <p>用指数 ETF、杠杆或反向 ETF、现金替代工具和短期仓位，动态管理净敞口、回撤修复与资金调度。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container section-intro" data-reveal>
+        <div>
+          <div class="eyebrow">Risk Governance</div>
+          <h2>真正重要的，不只是赚多少，而是坏的时候如何活下来。</h2>
+        </div>
+        <p class="section-lede">
+          Oval Fund 的条款草案把风险治理写成了明确的操作层，而不是停留在口号层。
+          页面上保留这部分，是为了让潜在合作方一开始就看到管理人与投资者之间的真实边界。
+        </p>
+      </div>
+
+      <div class="container risk-grid">
+        <article class="risk-card" data-reveal>
+          <div class="card-index">A</div>
+          <h3>仓位构建优先可解释</h3>
+          <p>组合强调定义风险、最大亏损可界定、杠杆与保证金约束可追踪，避免用单一方向性暴露替代真正的组合管理。</p>
+        </article>
+
+        <article class="risk-card" data-reveal>
+          <div class="card-index">B</div>
+          <h3>估值与净值允许后续修正</h3>
+          <p>当报价失真、流动性不足或参数异常时，管理人可基于公允价值原则调整估值，避免用失真的市场价格制造“好看”的报表。</p>
+        </article>
+
+        <article class="risk-card" data-reveal>
+          <div class="card-index">C</div>
+          <h3>极端情况下优先保护整体组合</h3>
+          <p>在经纪商限制交易、市场断裂或清算环境恶化时，允许使用 gate、standstill、side pocket 和实物赎回等工具，先守住组合完整性。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="terms" class="section section-tone">
+      <div class="container terms-layout">
+        <div data-reveal>
+          <div class="eyebrow">Fund Terms</div>
+          <h2>费用、流动性与合作规则，页面上先讲清楚。</h2>
+          <p class="section-lede">
+            以下内容根据《Oval Fund, L.P. 私募基金份额认购协议暨主要基金条款》草案整理而成，
+            用于网站层面的摘要展示。正式文件仍应以最终签署版本及律师意见为准。
+          </p>
+
+          <div class="note-card" style="margin-top:24px;">
+            <div class="panel-kicker">Draft Language</div>
+            <blockquote>“开放式”不等于任何时点都能无条件按现金形式退出。</blockquote>
+            <p>
+              这不是营销用语，而是风险治理的底线。页面保留这一点，是为了让基金站点从一开始就呈现更成熟、更可信的边界感。
+            </p>
+          </div>
+        </div>
+
+        <div class="terms-grid">
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Minimum</div>
+            <h3>初始最低认购额</h3>
+            <p>US$5,000 起，管理人可视投资者背景、规模与合作情形决定是否豁免。</p>
+          </article>
+
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Subscriptions</div>
+            <h3>申购频率</h3>
+            <p>原则上为每月首个营业日，资金通常需在申购截止日前 3 个营业日足额到账。</p>
+          </article>
+
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Fees</div>
+            <h3>费用结构</h3>
+            <p>0% 管理费；仅对超过 6% annual hard hurdle 的新增利润部分，按 25% 计提业绩报酬。</p>
+          </article>
+
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Accounting</div>
+            <h3>高水位与系列会计</h3>
+            <p>采用 Perpetual High-Water Mark，并以 series accounting 或同等机制减少新旧资金交叉补贴。</p>
+          </article>
+
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Redemptions</div>
+            <h3>常规赎回</h3>
+            <p>季度末赎回，通常需要至少 65 日书面通知；管理人可接受全部或部分赎回。</p>
+          </article>
+
+          <article class="term-card" data-reveal>
+            <div class="term-kicker">Eligibility</div>
+            <h3>投资者适格性</h3>
+            <p>原则上面向符合 Accredited Investor 标准的对象；如承担业绩报酬，通常还应满足 Qualified Client 要求。</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="container liquidity-strip">
+        <div class="liquidity-card" data-reveal>
+          <strong>Gate</strong>
+          <p>单一赎回日可设置赎回上限，避免集中赎回导致组合被迫折价出售。</p>
+        </div>
+        <div class="liquidity-card" data-reveal>
+          <strong>Standstill</strong>
+          <p>在极端失序阶段，管理人可延后、分期或暂停处理赎回申请。</p>
+        </div>
+        <div class="liquidity-card" data-reveal>
+          <strong>Side Pocket</strong>
+          <p>将流动性不足、难估值或实现周期较长的资产从常规可赎回组合中隔离。</p>
+        </div>
+        <div class="liquidity-card" data-reveal>
+          <strong>Liquidating Class</strong>
+          <p>针对已申请赎回但所占资产难以及时出售的投资者，采用 slow-pay 或清算份额安排。</p>
+        </div>
+        <div class="liquidity-card" data-reveal>
+          <strong>In-Kind Redemption</strong>
+          <p>如现金赎回会伤害存续投资者利益，可按善意原则使用实物分配。</p>
         </div>
       </div>
     </section>
 
     <section id="team" class="section">
-      <div class="container">
-        <h2>团队</h2>
-        <p class="lede">
-          Oval Fund 由具备长期投资视角、跨学科研究背景与纪律性执行能力的成员共同推动。
-          我们强调独立研究、长期主义与一致的风险框架，在不同市场周期中保持稳定判断与持续学习。
-        </p>
-
-        <div class="team" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:28px;margin-top:24px;">
-          <div class="card" style="padding:28px;">
-            <img
-              src="yitao.jpg.jpg"
-              alt="Yitao Tang"
-              style="width:100%;max-width:340px;aspect-ratio:3/4;object-fit:cover;border-radius:16px;display:block;margin-bottom:20px;"
-            />
-            <h3 style="margin-bottom:8px;">Yitao Tang</h3>
-            <div class="role" style="margin-bottom:16px;">Founder / Portfolio Manager</div>
-            <p class="note" style="line-height:1.9;">
-              Yitao Tang 是 Oval Fund 的创始人与投资组合管理人。他目前于纽约哥伦比亚大学学习量子计算，此前在伦敦国王学院获得电子工程学士学位，以工程师的思维方式理解投资——保持好奇、重视分析，并始终立足基本面。他在 16 岁时便开始买入 AMD、Nvidia 与 Tesla 等股票，长期坚持独立研究与长期投资，逐步形成了以纪律、耐心与跨周期判断为核心的投资风格。
-            </p>
-          </div>
-
-          <div class="card" style="padding:28px;">
-            <img
-              src="zhe.jpg.jpg"
-              alt="Zhe Liu"
-              style="width:100%;max-width:340px;aspect-ratio:3/4;object-fit:cover;border-radius:16px;display:block;margin-bottom:20px;"
-            />
-            <h3 style="margin-bottom:8px;">Zhe Liu</h3>
-            <div class="role" style="margin-bottom:16px;">Operations</div>
-            <p class="note" style="line-height:1.9;">
-              Zhe Liu 负责基金运营管理、风控体系建设与执行流程优化，是基金稳定运转与纪律化管理的重要支柱。现任帝国理工学院商学院运营管理助理教授，拥有哥伦比亚大学商学院运营管理博士学位及清华大学工业工程学士学位，兼具顶尖学术训练与扎实的定量决策能力。其研究聚焦运营管理、供应链优化与平台经济，在复杂系统决策、资源配置与风险约束方面具备深厚方法论积累；同时长期跟踪全球权益与数字资产市场，对仓位管理、波动控制与全周期风险管理有深入理解，为基金日常运营与风险框架提供稳定支撑。
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="performance" class="section">
-      <div class="container">
-        <h2>业绩</h2>
-        <p class="lede">
-          业绩使用 Base=100（起始净值=100）展示累计收益率（%）。下方为主页内嵌图表与统计。
-        </p>
-
-        <div class="chart-box" style="margin-top:16px;">
-          <iframe
-            src="performance.html?embed=1"
-            style="width:100%; height:660px; border:0;"
-            loading="lazy"
-            title="Oval Fund Performance">
-          </iframe>
-        </div>
-
-        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="#contact">索取完整报告</a>
-        </div>
-
-        <p class="note" style="margin-top:10px;">
-          注：投资有风险，可能损失本金；过往业绩不代表未来表现。
-        </p>
-      </div>
-    </section>
-
-    <section id="letters" class="section" style="display:none;" aria-hidden="true">
-      <div class="container">
-        <div class="card compact">
-          <div data-filter="year" class="pills"></div>
-          <div data-filter="quarter" class="pills"></div>
-        </div>
-        <div id="lettersGrid" class="letters-grid" aria-label="Letter list"></div>
-      </div>
-    </section>
-
-    <section id="research" class="section">
-      <div class="container">
-        <h2>研究与材料</h2>
-        <p class="lede">你可以在这里放：投资框架、研究文章、投资演示材料（PDF）、以及对外的“tearsheet”。</p>
-
-        <div class="grid-2" style="margin-top:16px;">
-          <div class="card">
-            <h3 style="margin-top:0;">示例链接</h3>
-            <ul class="list">
-              <li><a href="#">Investor Tearsheet（PDF）</a></li>
-              <li><a href="#">投资框架 / Presentation（PDF）</a></li>
-              <li><a href="#">单个标的研究（PDF/文章）</a></li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <h3 style="margin-top:0;">建议写清楚的口径</h3>
-            <ul class="list">
-              <li>研究材料是否面向所有人公开？</li>
-              <li>是否会披露持仓？披露到什么粒度？</li>
-              <li>是否存在利益冲突（例如持有文中标的）？</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="section">
-      <div class="container grid-2">
+      <div class="container section-intro" data-reveal>
         <div>
-          <h2>联系</h2>
-          <p class="lede">
-            静态网站没有后端时，联系表单通常用第三方（例如 Formspree / Netlify Forms）。
-            下面的表单你只需要把 <code>action</code> 换成你的 Formspree endpoint 就能用。
+          <div class="eyebrow">Team</div>
+          <h2>研究、执行与运营分工明确，站点表达也要清晰。</h2>
+        </div>
+        <p class="section-lede">
+          团队页不只是在放简历，而是在告诉访客：谁负责组合、谁负责运营、谁为风险语言负责。
+          这会直接影响一个基金网站给人的可信度。
+        </p>
+      </div>
+
+      <div class="container team-grid">
+        <article class="team-card" data-reveal>
+          <div class="team-media">
+            <img src="yitao.jpg.jpg" alt="Yitao Tang" />
+          </div>
+          <div class="team-body">
+            <h3>Yitao Tang</h3>
+            <div class="role">Founder / Portfolio Manager</div>
+            <p>
+              Yitao Tang 负责基金的投资研究、组合构建与交易表达。目前于哥伦比亚大学学习量子计算，
+              此前在伦敦国王学院获得电子工程学士学位。工程训练让他的投资方法更偏重结构、约束和可验证性，
+              长期围绕科技成长、期权结构与跨周期风险管理形成自己的框架。
+            </p>
+            <div class="focus-pills">
+              <span class="focus-pill">Portfolio Construction</span>
+              <span class="focus-pill">Options Structuring</span>
+              <span class="focus-pill">Crisis Convexity</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card" data-reveal>
+          <div class="team-media">
+            <img src="zhe.jpg.jpg" alt="Zhe Liu" />
+          </div>
+          <div class="team-body">
+            <h3>Zhe Liu</h3>
+            <div class="role">Operations / Risk Architecture</div>
+            <p>
+              Zhe Liu 负责运营管理、风控框架与执行流程优化。现任帝国理工商学院运营管理助理教授，
+              拥有哥伦比亚大学商学院运营管理博士学位及清华大学工业工程学士学位。
+              其研究背景强化了基金在流程控制、资源配置、复杂系统决策与风险约束方面的方法论表达。
+            </p>
+            <div class="focus-pills">
+              <span class="focus-pill">Operations</span>
+              <span class="focus-pill">Process Discipline</span>
+              <span class="focus-pill">Risk Systems</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="performance" class="section section-tone">
+      <div class="container perf-layout">
+        <div data-reveal>
+          <div class="eyebrow">Performance</div>
+          <h2>业绩展示不只要有曲线，还要有背景、节奏与解释。</h2>
+          <p class="section-lede">
+            首页只展示最重要的概览指标与预览曲线，完整对比、净值路径和图表说明集中放在独立业绩页。
+            当前公开数据来自仓库中的 <code>data/performance.csv</code>，最新日期为 <span data-perf-date-long>—</span>。
           </p>
 
-          <div class="card" style="margin-top:16px;">
-            <h3 style="margin-top:0;">发送消息</h3>
+          <div class="perf-stats">
+            <div class="stat-card">
+              <span>Since Inception</span>
+              <strong data-perf-since>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Approx. 90D</span>
+              <strong data-perf-quarter>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Latest NAV</span>
+              <strong data-perf-nav>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Max Drawdown</span>
+              <strong data-perf-mdd>—</strong>
+            </div>
+          </div>
 
-            <form action="https://formspree.io/f/yourFormId" method="POST">
-              <div class="form-grid">
-                <div>
-                  <label class="note">姓名</label>
-                  <input name="name" placeholder="你的姓名" required />
-                </div>
-                <div>
-                  <label class="note">邮箱</label>
-                  <input type="email" name="email" placeholder="name@email.com" required />
-                </div>
-              </div>
+          <div class="summary-note" data-perf-benchmark>—</div>
 
-              <div style="margin-top:12px;">
-                <label class="note">留言</label>
-                <textarea name="message" placeholder="你想了解什么？"></textarea>
-              </div>
-
-              <div class="form-actions">
-                <button class="btn primary" type="submit">提交</button>
-                <span class="note">（请先配置 Formspree，否则不会生效）</span>
-              </div>
-            </form>
+          <div class="hero-cta">
+            <a class="btn primary" href="performance.html">查看完整业绩页</a>
+            <a class="btn" href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Investor%20Inquiry">索取详细材料</a>
           </div>
         </div>
 
-     <aside class="card">
-  <h3 style="margin-top:0;">加入邮件列表（可选）</h3>
-  <p class="note">
-    你可以用 Mailchimp / ConvertKit 等提供的订阅表单代码替换这里。
-  </p>
+        <div class="perf-visual glass-card" data-reveal>
+          <div class="panel-kicker">Preview Chart</div>
+          <div class="chart-box">
+            <canvas id="perfMini" aria-label="Oval Fund performance preview" role="img"></canvas>
+          </div>
+          <div class="perf-caption">
+            数据读取状态：<span data-perf-status>正在加载...</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <form>
-    <div>
-      <label class="note">邮箱</label>
-      <input type="email" placeholder="name@email.com" />
+    <section id="materials" class="section">
+      <div class="container materials-grid">
+        <div data-reveal>
+          <div class="eyebrow">Materials</div>
+          <h2>公开页面负责建立判断，详细材料按场景定向沟通。</h2>
+          <p class="section-lede">
+            你现在这个仓库最适合承载的是官网首页、业绩页和基础说明。
+            更敏感的策略细节、完整条款、募资材料和更细颗粒度的报告，建议按投资者沟通节奏分层提供。
+          </p>
+        </div>
+
+        <div class="material-cards">
+          <article class="material-card" data-reveal>
+            <span>Overview</span>
+            <h3>Investor Overview</h3>
+            <p>用于首次沟通的基金定位说明，适合概述策略语言、团队分工和合作框架。</p>
+            <div class="hero-cta">
+              <a class="btn" href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Overview">邮件索取</a>
+            </div>
+          </article>
+
+          <article class="material-card" data-reveal>
+            <span>Terms</span>
+            <h3>Indicative Terms</h3>
+            <p>针对适格对象按需分享更完整的费用、流动性、防火墙和法律条款摘要。</p>
+            <div class="hero-cta">
+              <a class="btn" href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Terms">邮件索取</a>
+            </div>
+          </article>
+
+          <article class="material-card" data-reveal>
+            <span>Updates</span>
+            <h3>Performance Notes</h3>
+            <p>净值更新、回撤说明、组合风险敞口变化和市场环境备注，建议作为持续沟通材料。</p>
+            <div class="hero-cta">
+              <a class="btn" href="performance.html">查看公开业绩页</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section section-tone">
+      <div class="container contact-grid">
+        <div data-reveal>
+          <div class="eyebrow">Contact</div>
+          <h2>把联系入口做得克制、真实，网站就不会显得“半成品”。</h2>
+          <p class="section-lede">
+            当前版本刻意没有放一个未配置的假表单，因为基金官网更适合给出明确联系人和沟通范围，
+            而不是做一个“看起来能提交、实际上发不出去”的占位模块。
+          </p>
+
+          <ul class="contact-list">
+            <li>
+              <strong>Email</strong>
+              <span><a href="mailto:yitao.tang@columbia.edu">yitao.tang@columbia.edu</a></span>
+            </li>
+            <li>
+              <strong>Base</strong>
+              <span>New York</span>
+            </li>
+            <li>
+              <strong>Topics</strong>
+              <span>投资框架、条款讨论、风险治理、合作方式与业绩材料。</span>
+            </li>
+            <li>
+              <strong>Current Format</strong>
+              <span>公开页面展示框架与概览，完整认购与尽调材料按场景定向分享。</span>
+            </li>
+          </ul>
+        </div>
+
+        <aside class="contact-card glass-card" data-reveal>
+          <div class="panel-kicker">Investor Conversation</div>
+          <h3>Request a direct discussion</h3>
+          <p>
+            如果你希望进一步查看条款摘要、策略说明或更完整的净值材料，
+            目前最合适的方式是直接邮件联系，而不是通过公开表单收集。
+          </p>
+          <a class="btn primary wide" href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Investor%20Inquiry">发送邮件</a>
+          <div class="contact-note">
+            For eligible prospective investors only. Full documents are shared privately where appropriate.
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <strong>Oval Fund</strong>
+      </div>
+      <div>
+        本站内容仅为基金框架与网站展示之摘要说明，不构成任何证券出售要约、购买邀请、收益承诺或个性化投资建议。
+      </div>
+      <div>© <span data-year></span> Oval Fund</div>
     </div>
-    <div class="form-actions">
-      <button class="btn" type="button" onclick="alert('把这里替换成你的邮件订阅服务（Mailchimp/ConvertKit）即可。')">订阅</button>
-    </div>
-  </form>
+  </footer>
 
-  <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
-
-  <div class="note">
-    <div><strong>Address</strong>: ONE MANHATTAN SQUARE</div>
-    <div><strong>Email</strong>: <a href="mailto:yitao.tang@columbia.edu">yitao.tang@columbia.edu</a></div>
-  </div>
-</aside>
-</div>
-</section>
-
-<div class="footer">
-  <div class="container">
-    <div>© <span id="year"></span> Oval Fund. All rights reserved.</div>
-    <div style="margin-top:6px;">
-      Built as a lightweight static site (GitHub Pages friendly).
-    </div>
-  </div>
-</div>
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-<script src="assets/js/site.js" defer></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('year').textContent = new Date().getFullYear();
-  });
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
 </body>
 </html>
