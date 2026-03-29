@@ -358,13 +358,29 @@
         <h2>首页业绩曲线</h2>
 
         <article class="chart-shell glass-card" style="margin-top: 20px;">
+          <div class="perf-stats">
+            <div class="stat-card">
+              <span>Year to Date</span>
+              <strong data-perf-ytd>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Since Inception</span>
+              <strong data-perf-since>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Latest NAV</span>
+              <strong data-perf-nav>—</strong>
+            </div>
+            <div class="stat-card">
+              <span>Max Drawdown</span>
+              <strong data-perf-mdd>—</strong>
+            </div>
+          </div>
+
+          <div class="summary-note" data-perf-status>正在加载业绩数据...</div>
+
           <div class="chart-box tall">
-            <iframe
-              src="performance-embed.html"
-              title="Oval Fund performance chart"
-              class="chart-frame"
-              loading="lazy">
-            </iframe>
+            <canvas id="perfHomeChart" aria-label="Oval Fund homepage performance chart" role="img"></canvas>
           </div>
         </article>
       </div>

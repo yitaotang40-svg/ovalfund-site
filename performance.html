@@ -77,12 +77,20 @@
               <strong id="kpiSince">—</strong>
             </div>
             <div class="summary-item">
+              <span>Year to Date</span>
+              <strong id="kpiYtd">—</strong>
+            </div>
+            <div class="summary-item">
               <span>Approx. 1M</span>
               <strong id="kpi1m">—</strong>
             </div>
             <div class="summary-item">
               <span>Approx. 3M</span>
               <strong id="kpi3m">—</strong>
+            </div>
+            <div class="summary-item">
+              <span>Latest NAV</span>
+              <strong id="kpiNav">—</strong>
             </div>
             <div class="summary-item">
               <span>Max Drawdown</span>
@@ -102,7 +110,7 @@
             <div class="eyebrow">Total Return</div>
             <h3>累计收益率对比</h3>
             <p>
-              基于 Base=100 的起始值计算累计收益率（%），便于直接对比 Fund、S&amp;P 500 与 BRK 的路径差异。
+              基于 Base=100 的起始值计算累计收益率（%），便于直接对比 Fund、S&amp;P 500、BRK 与 GLD 的路径差异。
             </p>
             <div class="chart-box tall">
               <canvas id="retChart" aria-label="Total return comparison chart" role="img"></canvas>
@@ -225,6 +233,7 @@
         const gldRet = gldIndex.map((value) => (Number.isFinite(value) ? value - 100 : null));
 
         const sinceStart = fundIndex.at(-1) / 100 - 1;
+        const yearToDate = Oval.returnYearToDate(orderedDates, fundIndex);
         const oneMonth = Oval.returnOverDays(orderedDates, fundIndex, 30);
         const threeMonths = Oval.returnOverDays(orderedDates, fundIndex, 90);
         const maxDrawdown = Oval.computeMaxDrawdown(fundIndex);
@@ -233,8 +242,10 @@
         const gldSinceStart = gldIndex.length ? gldIndex.at(-1) / 100 - 1 : Number.NaN;
 
         get('kpiSince').textContent = Oval.formatPct(sinceStart);
+        get('kpiYtd').textContent = Oval.formatPct(yearToDate);
         get('kpi1m').textContent = Oval.formatPct(oneMonth);
         get('kpi3m').textContent = Oval.formatPct(threeMonths);
+        get('kpiNav').textContent = Oval.formatMoney(orderedFund.at(-1));
         get('kpiMdd').textContent = Oval.formatPct(maxDrawdown);
         get('kpiBench').textContent =
           `Benchmark snapshot: Fund ${Oval.formatPct(sinceStart)} · S&P 500 ${Oval.formatPct(spSinceStart)} · BRK ${Oval.formatPct(brkSinceStart)} · GLD ${Oval.formatPct(gldSinceStart)}`;

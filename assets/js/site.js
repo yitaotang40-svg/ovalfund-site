@@ -255,6 +255,28 @@ function returnOverDays(dates, indexSeries, days) {
   return end / start - 1;
 }
 
+function returnYearToDate(dates, indexSeries) {
+  if (!dates.length || !indexSeries.length) {
+    return Number.NaN;
+  }
+
+  const lastIndex = dates.length - 1;
+  const targetYear = dates[lastIndex].getUTCFullYear();
+  const anchor = dates.findIndex((date) => date.getUTCFullYear() === targetYear);
+
+  if (anchor === -1) {
+    return Number.NaN;
+  }
+
+  const start = indexSeries[anchor];
+  const end = indexSeries[lastIndex];
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start === 0) {
+    return Number.NaN;
+  }
+
+  return end / start - 1;
+}
+
 function fillField(attribute, value) {
   qa(`[${attribute}]`).forEach((node) => {
     node.textContent = value;
@@ -363,7 +385,9 @@ function renderReturnChart(canvasSelector, labels, fundRet, spRet, brkRet, compa
 async function loadHomePerformance() {
   const needsPerformance =
     q('#perfMini') ||
+    q('#perfHomeChart') ||
     qa('[data-perf-since]').length ||
+    qa('[data-perf-ytd]').length ||
     qa('[data-perf-nav]').length ||
     qa('[data-perf-mdd]').length ||
     qa('[data-perf-date]').length ||
@@ -443,6 +467,7 @@ async function loadHomePerformance() {
     const brkIndex = orderedBrk.map((value) => (value / baseBrk) * 100);
 
     const sinceStart = fundIndex.at(-1) / 100 - 1;
+    const yearToDate = returnYearToDate(orderedDates, fundIndex);
     const quarter = returnOverDays(orderedDates, fundIndex, 90);
     const maxDrawdown = computeMaxDrawdown(fundIndex);
     const latestDate = orderedDates.at(-1);
@@ -450,6 +475,7 @@ async function loadHomePerformance() {
     const brkSinceStart = brkIndex.at(-1) / 100 - 1;
 
     fillField('data-perf-since', formatPct(sinceStart));
+    fillField('data-perf-ytd', formatPct(yearToDate));
     fillField('data-perf-quarter', formatPct(quarter));
     fillField('data-perf-nav', formatMoney(orderedFund.at(-1)));
     fillField('data-perf-mdd', formatPct(maxDrawdown));
@@ -483,7 +509,8 @@ window.OvalSite = {
   formatPct,
   formatMoney,
   computeMaxDrawdown,
-  returnOverDays
+  returnOverDays,
+  returnYearToDate
 };
 
 document.addEventListener('DOMContentLoaded', () => {
