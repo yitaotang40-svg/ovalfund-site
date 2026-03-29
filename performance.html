@@ -6,7 +6,7 @@
   <title>Oval Fund | Performance Dashboard</title>
   <meta
     name="description"
-    content="Oval Fund performance dashboard showing cumulative return, NAV path, and core summary statistics sourced from performance.csv."
+    content="Oval Fund performance dashboard showing the main cumulative return curve and core summary statistics sourced from performance.csv."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,7 +32,6 @@
 
         <nav class="nav-links" aria-label="Primary">
           <a href="index.html#philosophy">理念</a>
-          <a href="index.html#strategy">策略</a>
           <a href="index.html#team">团队</a>
           <a href="index.html#contact">联系</a>
           <a class="active" href="performance.html">业绩</a>
@@ -89,59 +88,31 @@
               <span>Max Drawdown</span>
               <strong id="kpiMdd">—</strong>
             </div>
-            <div class="summary-item">
-              <span>Latest NAV</span>
-              <strong id="kpiNav">—</strong>
-            </div>
           </div>
 
           <div class="divider"></div>
-          <div class="summary-note" id="navInfo">—</div>
           <div class="summary-note" id="kpiBench">—</div>
         </aside>
       </div>
     </section>
 
     <section class="section">
-      <div class="container performance-grid">
-        <article class="chart-shell glass-card" data-reveal>
-          <div class="eyebrow">Total Return</div>
-          <h3>累计收益率对比</h3>
-          <p>
-            基于 Base=100 的起始值计算累计收益率（%），便于直接对比 Fund、S&amp;P 500 与 BRK 的路径差异。
-          </p>
-          <div class="chart-box tall">
-            <canvas id="retChart" aria-label="Total return comparison chart" role="img"></canvas>
-          </div>
-        </article>
-
-        <div class="two-column">
+        <div class="container performance-grid">
           <article class="chart-shell glass-card" data-reveal>
-            <div class="eyebrow">NAV Path</div>
-            <h3>单位净值 / Share Price</h3>
-            <p>该图展示 Fund 的单位净值路径，默认起始值为 $100.00，更接近投资者实际感知的资金轨迹。</p>
-            <div class="chart-box medium">
-              <canvas id="navChart" aria-label="Fund NAV chart" role="img"></canvas>
+            <div class="eyebrow">Total Return</div>
+            <h3>累计收益率对比</h3>
+            <p>
+              基于 Base=100 的起始值计算累计收益率（%），便于直接对比 Fund、S&amp;P 500 与 BRK 的路径差异。
+            </p>
+            <div class="chart-box tall">
+              <canvas id="retChart" aria-label="Total return comparison chart" role="img"></canvas>
+            </div>
+            <div class="fine-print">
+              注：投资有风险，可能损失本金；过往业绩不代表未来表现。本页展示仅用于说明累计收益路径，不构成公开募集材料。
             </div>
           </article>
-
-          <aside class="chart-shell glass-card" data-reveal>
-            <div class="eyebrow">Reading Guide</div>
-            <h3>如何阅读这组数据</h3>
-            <ul class="insight-list">
-              <li>收益率曲线显示的是累计回报，不是单期回报，因此更适合观察路径、弹性和回撤修复速度。</li>
-              <li>净值图更适合讨论“投资者体感”，因为它直接对应单位资金的价值变化。</li>
-              <li>近 1 个月和近 3 个月收益为近似窗口值，基于 CSV 中的最后日期反推 30 天和 90 天。</li>
-              <li>最大回撤使用 Fund 净值路径计算，反映从历史峰值回落的最深幅度。</li>
-            </ul>
-
-            <div class="fine-print">
-              注：投资有风险，可能损失本金；过往业绩不代表未来表现。本页展示仅用于说明净值与风险路径，不构成公开募集材料。
-            </div>
-          </aside>
         </div>
-      </div>
-    </section>
+      </section>
   </main>
 
   <footer class="site-footer">
@@ -254,15 +225,11 @@
         get('kpi1m').textContent = Oval.formatPct(oneMonth);
         get('kpi3m').textContent = Oval.formatPct(threeMonths);
         get('kpiMdd').textContent = Oval.formatPct(maxDrawdown);
-        get('kpiNav').textContent = Oval.formatMoney(orderedFund.at(-1));
         get('kpiBench').textContent =
           `Benchmark snapshot: Fund ${Oval.formatPct(sinceStart)} · S&P 500 ${Oval.formatPct(spSinceStart)} · BRK ${Oval.formatPct(brkSinceStart)}`;
 
-        const startDate = orderedDates[0];
         const lastDate = orderedDates.at(-1);
         get('lastDate').textContent = Oval.formatISODate(lastDate);
-        get('navInfo').textContent =
-          `Fund 起始净值为 ${Oval.formatMoney(baseFund)}（${Oval.formatISODate(startDate)}），最新净值为 ${Oval.formatMoney(orderedFund.at(-1))}（${Oval.formatISODate(lastDate)}）。`;
         setStatus(`已加载 ${orderedDates.length} 条记录`);
 
         const styles = getComputedStyle(document.documentElement);
@@ -355,52 +322,10 @@
           }
         });
 
-        new Chart(get('navChart'), {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [
-              {
-                label: 'Fund NAV',
-                data: orderedFund,
-                borderColor: accent,
-                backgroundColor: 'transparent',
-                borderWidth: 2.4,
-                pointRadius: 0,
-                tension: 0.28
-              }
-            ]
-          },
-          options: {
-            ...sharedOptions,
-            plugins: {
-              ...sharedOptions.plugins,
-              tooltip: {
-                callbacks: {
-                  label(context) {
-                    return `Fund NAV: ${Oval.formatMoney(context.parsed.y)}`;
-                  }
-                }
-              }
-            },
-            scales: {
-              ...sharedOptions.scales,
-              y: {
-                ...sharedOptions.scales.y,
-                ticks: {
-                  color: '#66707d',
-                  callback(value) {
-                    return `$${Number(value).toFixed(2)}`;
-                  }
-                }
-              }
-            }
-          }
-        });
       } catch (error) {
         console.error(error);
         setStatus('数据加载失败');
-        get('navInfo').textContent = '无法读取 data/performance.csv，请检查文件路径与列名。';
+        get('kpiBench').textContent = '无法读取 data/performance.csv，请检查文件路径与列名。';
       }
     });
   </script>

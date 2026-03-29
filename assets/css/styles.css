@@ -281,6 +281,10 @@ main,
   padding: 24px;
 }
 
+.perf-home-chart {
+  margin-top: 22px;
+}
+
 .terms-layout {
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   align-items: start;
@@ -557,7 +561,7 @@ main,
 }
 
 .team-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .material-cards {
@@ -638,23 +642,32 @@ main,
 }
 
 .team-card {
-  padding: 0;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
   overflow: hidden;
+  align-items: start;
 }
 
 .team-media {
+  max-width: 240px;
+  width: 100%;
+  justify-self: start;
+  border-radius: 20px;
+  overflow: hidden;
   background: linear-gradient(135deg, rgba(19, 58, 102, 0.16), rgba(194, 143, 67, 0.18));
 }
 
 .team-media img {
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 16%;
 }
 
 .team-body {
-  padding: 24px;
+  padding: 4px 0 0;
 }
 
 .role {
@@ -829,8 +842,7 @@ main,
     justify-content: flex-start;
   }
 
-  .overview-ribbon,
-  .team-grid {
+  .overview-ribbon {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -868,12 +880,14 @@ main,
   .strategy-grid,
   .risk-grid,
   .liquidity-strip,
-  .team-grid {
-    grid-template-columns: 1fr;
-  }
-
   .section {
     padding: 68px 0;
+  }
+
+  .team-card {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 20px;
   }
 
   .nav-links,
@@ -912,6 +926,10 @@ main,
 
   .chart-box.tall {
     height: 360px;
+  }
+
+  .team-media {
+    max-width: 260px;
   }
 }
 

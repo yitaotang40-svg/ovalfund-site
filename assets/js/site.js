@@ -261,14 +261,15 @@ function fillField(attribute, value) {
   });
 }
 
-function renderPreviewChart(labels, fundRet, spRet, brkRet) {
-  const canvas = q('#perfMini');
+function renderReturnChart(canvasSelector, labels, fundRet, spRet, brkRet, compact = false) {
+  const canvas = q(canvasSelector);
   if (!canvas || typeof Chart === 'undefined') {
     return;
   }
 
-  if (window.__ovalPreviewChart) {
-    window.__ovalPreviewChart.destroy();
+  const chartKey = canvasSelector.replace(/[^a-z0-9]/gi, '');
+  if (window[chartKey]) {
+    window[chartKey].destroy();
   }
 
   const styles = getComputedStyle(document.documentElement);
@@ -276,7 +277,7 @@ function renderPreviewChart(labels, fundRet, spRet, brkRet) {
   const accentTwo = styles.getPropertyValue('--accent-2').trim() || '#c28f43';
   const accentThree = styles.getPropertyValue('--accent-3').trim() || '#7b9ab8';
 
-  window.__ovalPreviewChart = new Chart(canvas, {
+  window[chartKey] = new Chart(canvas, {
     type: 'line',
     data: {
       labels,
@@ -318,7 +319,7 @@ function renderPreviewChart(labels, fundRet, spRet, brkRet) {
         legend: {
           position: 'top',
           labels: {
-            boxWidth: 14,
+            boxWidth: compact ? 12 : 14,
             color: '#3b4756'
           }
         },
@@ -333,7 +334,7 @@ function renderPreviewChart(labels, fundRet, spRet, brkRet) {
       scales: {
         x: {
           ticks: {
-            maxTicksLimit: 5,
+            maxTicksLimit: compact ? 5 : 8,
             color: '#66707d'
           },
           grid: {
@@ -344,7 +345,7 @@ function renderPreviewChart(labels, fundRet, spRet, brkRet) {
           ticks: {
             color: '#66707d',
             callback(value) {
-              return `${Number(value).toFixed(0)}%`;
+              return compact ? `${Number(value).toFixed(0)}%` : `${Number(value).toFixed(2)}%`;
             }
           },
           grid: {
@@ -461,7 +462,8 @@ async function loadHomePerformance() {
     const fundRet = fundIndex.map((value) => value - 100);
     const spRet = spIndex.map((value) => value - 100);
     const brkRet = brkIndex.map((value) => value - 100);
-    renderPreviewChart(labels, fundRet, spRet, brkRet);
+    renderReturnChart('#perfMini', labels, fundRet, spRet, brkRet, true);
+    renderReturnChart('#perfHomeChart', labels, fundRet, spRet, brkRet, false);
   } catch (error) {
     console.error(error);
     fillField('data-perf-status', '业绩数据暂时不可用');

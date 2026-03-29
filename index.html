@@ -32,7 +32,6 @@
 
         <nav class="nav-links" aria-label="Primary">
           <a href="#philosophy">理念</a>
-          <a href="#strategy">策略</a>
           <a href="#terms">条款</a>
           <a href="#team">团队</a>
           <a href="#performance">业绩</a>
@@ -179,51 +178,6 @@
           <p>
             我们不承诺危机中必然盈利，但会优先准备在失序时期仍能运作的交易结构、风控工具和流动性防火墙。
           </p>
-        </article>
-      </div>
-    </section>
-
-    <section id="strategy" class="section section-tone">
-      <div class="container section-intro" data-reveal>
-        <div>
-          <div class="eyebrow">Strategy Architecture</div>
-          <h2>用多模块协同，而不是用单一风格押注市场。</h2>
-        </div>
-        <p class="section-lede">
-          页面内容基于认购协议草案整理，突出目前最清晰的五个策略模块。
-          它们可以单独运行，也可以随着市场环境、波动率定价和风险预算动态叠加。
-        </p>
-      </div>
-
-      <div class="container strategy-grid">
-        <article class="strategy-card" data-reveal>
-          <div class="strategy-meta">Crisis Convexity</div>
-          <h3>危机凸性与尾部覆盖</h3>
-          <p>通过指数 put、put spread、calendar put 和定义风险结构，在急跌与波动率飙升时提升组合的非线性保护能力。</p>
-        </article>
-
-        <article class="strategy-card" data-reveal>
-          <div class="strategy-meta">Event-Driven Optionality</div>
-          <h3>事件驱动可选性</h3>
-          <p>围绕财报、监管、主题轮动与产业周期，用单名股票的 call、spread、diagonal 和 stock-option overlay 表达观点。</p>
-        </article>
-
-        <article class="strategy-card" data-reveal>
-          <div class="strategy-meta">Relative Value Volatility</div>
-          <h3>波动率相对价值</h3>
-          <p>利用前后月波动率差、skew 扭曲和局部曲率变化，在可测算风险预算内做期限结构和波动率相对价值交易。</p>
-        </article>
-
-        <article class="strategy-card" data-reveal>
-          <div class="strategy-meta">Cross-Asset Overlay</div>
-          <h3>跨资产宏观覆盖</h3>
-          <p>通过黄金、能源、利率敏感工具及数字资产代理工具，构建通胀、信用收缩、政策转向等情景下的 overlay。</p>
-        </article>
-
-        <article class="strategy-card" data-reveal>
-          <div class="strategy-meta">Tactical Beta &amp; Liquidity</div>
-          <h3>战术 Beta 与流动性袖口</h3>
-          <p>用指数 ETF、杠杆或反向 ETF、现金替代工具和短期仓位，动态管理净敞口、回撤修复与资金调度。</p>
         </article>
       </div>
     </section>
@@ -399,7 +353,7 @@
     </section>
 
     <section id="performance" class="section section-tone">
-      <div class="container perf-layout">
+        <div class="container perf-layout">
         <div data-reveal>
           <div class="eyebrow">Performance</div>
           <h2>业绩展示不只要有曲线，还要有背景、节奏与解释。</h2>
@@ -435,17 +389,30 @@
           </div>
         </div>
 
-        <div class="perf-visual glass-card" data-reveal>
-          <div class="panel-kicker">Preview Chart</div>
-          <div class="chart-box">
-            <canvas id="perfMini" aria-label="Oval Fund performance preview" role="img"></canvas>
-          </div>
-          <div class="perf-caption">
-            数据读取状态：<span data-perf-status>正在加载...</span>
+          <div class="perf-visual glass-card" data-reveal>
+            <div class="panel-kicker">Preview Chart</div>
+            <div class="chart-box">
+              <canvas id="perfMini" aria-label="Oval Fund performance preview" role="img"></canvas>
+            </div>
+            <div class="perf-caption">
+              数据读取状态：<span data-perf-status>正在加载...</span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+
+        <div class="container perf-home-chart" data-reveal>
+          <article class="chart-shell glass-card">
+            <div class="eyebrow">Return Curve</div>
+            <h3>首页业绩曲线</h3>
+            <p>
+              这里恢复首页的大曲线图，直接展示 Fund、S&amp;P 500 与 BRK 的累计收益路径，方便访客第一眼看到净值曲线风格。
+            </p>
+            <div class="chart-box tall">
+              <canvas id="perfHomeChart" aria-label="Oval Fund homepage performance chart" role="img"></canvas>
+            </div>
+          </article>
+        </div>
+      </section>
 
     <section id="materials" class="section">
       <div class="container materials-grid">
