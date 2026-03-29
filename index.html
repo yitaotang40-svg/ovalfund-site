@@ -353,66 +353,22 @@
     </section>
 
     <section id="performance" class="section section-tone">
-        <div class="container perf-layout">
-        <div data-reveal>
-          <div class="eyebrow">Performance</div>
-          <h2>业绩展示不只要有曲线，还要有背景、节奏与解释。</h2>
-          <p class="section-lede">
-            首页只展示最重要的概览指标与预览曲线，完整对比、净值路径和图表说明集中放在独立业绩页。
-            当前公开数据来自仓库中的 <code>data/performance.csv</code>，最新日期为 <span data-perf-date-long>—</span>。
-          </p>
+      <div class="container" data-reveal>
+        <div class="eyebrow">Performance</div>
+        <h2>首页业绩曲线</h2>
 
-          <div class="perf-stats">
-            <div class="stat-card">
-              <span>Since Inception</span>
-              <strong data-perf-since>—</strong>
-            </div>
-            <div class="stat-card">
-              <span>Approx. 90D</span>
-              <strong data-perf-quarter>—</strong>
-            </div>
-            <div class="stat-card">
-              <span>Latest NAV</span>
-              <strong data-perf-nav>—</strong>
-            </div>
-            <div class="stat-card">
-              <span>Max Drawdown</span>
-              <strong data-perf-mdd>—</strong>
-            </div>
+        <article class="chart-shell glass-card" style="margin-top: 20px;">
+          <div class="chart-box tall">
+            <iframe
+              src="performance-embed.html"
+              title="Oval Fund performance chart"
+              class="chart-frame"
+              loading="lazy">
+            </iframe>
           </div>
-
-          <div class="summary-note" data-perf-benchmark>—</div>
-
-          <div class="hero-cta">
-            <a class="btn primary" href="performance.html">查看完整业绩页</a>
-            <a class="btn" href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Investor%20Inquiry">索取详细材料</a>
-          </div>
-        </div>
-
-          <div class="perf-visual glass-card" data-reveal>
-            <div class="panel-kicker">Preview Chart</div>
-            <div class="chart-box">
-              <canvas id="perfMini" aria-label="Oval Fund performance preview" role="img"></canvas>
-            </div>
-            <div class="perf-caption">
-              数据读取状态：<span data-perf-status>正在加载...</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="container perf-home-chart" data-reveal>
-          <article class="chart-shell glass-card">
-            <div class="eyebrow">Return Curve</div>
-            <h3>首页业绩曲线</h3>
-            <p>
-              这里恢复首页的大曲线图，直接展示 Fund、S&amp;P 500 与 BRK 的累计收益路径，方便访客第一眼看到净值曲线风格。
-            </p>
-            <div class="chart-box tall">
-              <canvas id="perfHomeChart" aria-label="Oval Fund homepage performance chart" role="img"></canvas>
-            </div>
-          </article>
-        </div>
-      </section>
+        </article>
+      </div>
+    </section>
 
     <section id="materials" class="section">
       <div class="container materials-grid">
