@@ -883,8 +883,25 @@ main,
     width: 100%;
   }
 
-  .nav-links a,
-  .btn {
+  .nav-links {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-links a {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .header-actions .btn,
+  .hero-cta .btn,
+  .page-actions .btn {
     width: 100%;
     justify-content: center;
   }
