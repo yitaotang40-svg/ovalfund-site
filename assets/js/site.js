@@ -268,8 +268,11 @@ function renderReturnChart(canvasSelector, labels, fundRet, spRet, brkRet, compa
   }
 
   const chartKey = canvasSelector.replace(/[^a-z0-9]/gi, '');
-  if (window[chartKey]) {
-    window[chartKey].destroy();
+  if (!window.__ovalCharts) {
+    window.__ovalCharts = {};
+  }
+  if (window.__ovalCharts[chartKey]) {
+    window.__ovalCharts[chartKey].destroy();
   }
 
   const styles = getComputedStyle(document.documentElement);
@@ -277,7 +280,7 @@ function renderReturnChart(canvasSelector, labels, fundRet, spRet, brkRet, compa
   const accentTwo = styles.getPropertyValue('--accent-2').trim() || '#c28f43';
   const accentThree = styles.getPropertyValue('--accent-3').trim() || '#7b9ab8';
 
-  window[chartKey] = new Chart(canvas, {
+  window.__ovalCharts[chartKey] = new Chart(canvas, {
     type: 'line',
     data: {
       labels,
