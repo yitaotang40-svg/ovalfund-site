@@ -6,7 +6,7 @@
   <title>Oval Fund | Performance Dashboard</title>
   <meta
     name="description"
-    content="Oval Fund performance dashboard showing the main cumulative return curve and core summary statistics sourced from performance.csv."
+    content="Oval Fund performance dashboard showing the main cumulative return curve and core summary statistics sourced from performance.csv, including GLD."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -161,6 +161,7 @@
         const idxSharePrice = Oval.findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
         const idxSP = Oval.findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
         const idxBRK = Oval.findCol(headers, ['BRK', 'BRK.B', 'BRK B']);
+        const idxGLD = Oval.findCol(headers, ['GLD']);
 
         if ([idxDate, idxSharePrice, idxSP, idxBRK].some((index) => index === -1)) {
           throw new Error('Missing required columns');
@@ -170,6 +171,7 @@
         const fundPrice = [];
         const sp = [];
         const brk = [];
+        const gld = [];
 
         for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
           const row = rows[rowIndex];
@@ -177,6 +179,7 @@
           const fund = Oval.parseNumber(row[idxSharePrice]);
           const spValue = Oval.parseNumber(row[idxSP]);
           const brkValue = Oval.parseNumber(row[idxBRK]);
+          const gldValue = idxGLD === -1 ? Number.NaN : Oval.parseNumber(row[idxGLD]);
 
           if (!date || !Number.isFinite(fund) || !Number.isFinite(spValue) || !Number.isFinite(brkValue)) {
             continue;
@@ -186,6 +189,7 @@
           fundPrice.push(fund);
           sp.push(spValue);
           brk.push(brkValue);
+          gld.push(Number.isFinite(gldValue) ? gldValue : null);
         }
 
         if (dates.length < 2) {
@@ -201,18 +205,24 @@
         const orderedFund = order.map((index) => fundPrice[index]);
         const orderedSp = order.map((index) => sp[index]);
         const orderedBrk = order.map((index) => brk[index]);
+        const orderedGld = order.map((index) => gld[index]);
 
         const baseFund = orderedFund[0];
         const baseSp = orderedSp[0];
         const baseBrk = orderedBrk[0];
+        const baseGld = orderedGld[0];
 
         const fundIndex = orderedFund.map((value) => (value / baseFund) * 100);
         const spIndex = orderedSp.map((value) => (value / baseSp) * 100);
         const brkIndex = orderedBrk.map((value) => (value / baseBrk) * 100);
+        const gldIndex = Number.isFinite(baseGld)
+          ? orderedGld.map((value) => (Number.isFinite(value) ? (value / baseGld) * 100 : null))
+          : [];
 
         const fundRet = fundIndex.map((value) => value - 100);
         const spRet = spIndex.map((value) => value - 100);
         const brkRet = brkIndex.map((value) => value - 100);
+        const gldRet = gldIndex.map((value) => (Number.isFinite(value) ? value - 100 : null));
 
         const sinceStart = fundIndex.at(-1) / 100 - 1;
         const oneMonth = Oval.returnOverDays(orderedDates, fundIndex, 30);
@@ -220,13 +230,14 @@
         const maxDrawdown = Oval.computeMaxDrawdown(fundIndex);
         const spSinceStart = spIndex.at(-1) / 100 - 1;
         const brkSinceStart = brkIndex.at(-1) / 100 - 1;
+        const gldSinceStart = gldIndex.length ? gldIndex.at(-1) / 100 - 1 : Number.NaN;
 
         get('kpiSince').textContent = Oval.formatPct(sinceStart);
         get('kpi1m').textContent = Oval.formatPct(oneMonth);
         get('kpi3m').textContent = Oval.formatPct(threeMonths);
         get('kpiMdd').textContent = Oval.formatPct(maxDrawdown);
         get('kpiBench').textContent =
-          `Benchmark snapshot: Fund ${Oval.formatPct(sinceStart)} · S&P 500 ${Oval.formatPct(spSinceStart)} · BRK ${Oval.formatPct(brkSinceStart)}`;
+          `Benchmark snapshot: Fund ${Oval.formatPct(sinceStart)} · S&P 500 ${Oval.formatPct(spSinceStart)} · BRK ${Oval.formatPct(brkSinceStart)} · GLD ${Oval.formatPct(gldSinceStart)}`;
 
         const lastDate = orderedDates.at(-1);
         get('lastDate').textContent = Oval.formatISODate(lastDate);
@@ -285,6 +296,15 @@
                 label: 'BRK',
                 data: brkRet,
                 borderColor: accentTwo,
+                backgroundColor: 'transparent',
+                borderWidth: 2.1,
+                pointRadius: 0,
+                tension: 0.28
+              },
+              {
+                label: 'GLD',
+                data: gldRet,
+                borderColor: '#7c5b2f',
                 backgroundColor: 'transparent',
                 borderWidth: 2.1,
                 pointRadius: 0,

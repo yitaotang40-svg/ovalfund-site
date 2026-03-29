@@ -185,6 +185,7 @@
           const idxSharePrice = findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
           const idxSP = findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
           const idxBRK = findCol(headers, ['BRK', 'BRK.B', 'BRK B']);
+          const idxGLD = findCol(headers, ['GLD']);
 
           if ([idxDate, idxSharePrice, idxSP, idxBRK].some((index) => index === -1)) {
             throw new Error('Missing required columns');
@@ -194,6 +195,7 @@
           const fundPrice = [];
           const sp = [];
           const brk = [];
+          const gld = [];
 
           for (let i = 1; i < rows.length; i += 1) {
             const row = rows[i];
@@ -201,6 +203,7 @@
             const fund = parseNumber(row[idxSharePrice]);
             const spValue = parseNumber(row[idxSP]);
             const brkValue = parseNumber(row[idxBRK]);
+            const gldValue = idxGLD === -1 ? Number.NaN : parseNumber(row[idxGLD]);
 
             if (!date || !Number.isFinite(fund) || !Number.isFinite(spValue) || !Number.isFinite(brkValue)) {
               continue;
@@ -210,6 +213,7 @@
             fundPrice.push(fund);
             sp.push(spValue);
             brk.push(brkValue);
+            gld.push(Number.isFinite(gldValue) ? gldValue : null);
           }
 
           if (dates.length < 2) {
@@ -225,14 +229,19 @@
           const orderedFund = order.map((index) => fundPrice[index]);
           const orderedSp = order.map((index) => sp[index]);
           const orderedBrk = order.map((index) => brk[index]);
+          const orderedGld = order.map((index) => gld[index]);
 
           const baseFund = orderedFund[0];
           const baseSp = orderedSp[0];
           const baseBrk = orderedBrk[0];
+          const baseGld = orderedGld[0];
 
           const fundRet = orderedFund.map((value) => (value / baseFund) * 100 - 100);
           const spRet = orderedSp.map((value) => (value / baseSp) * 100 - 100);
           const brkRet = orderedBrk.map((value) => (value / baseBrk) * 100 - 100);
+          const gldRet = Number.isFinite(baseGld)
+            ? orderedGld.map((value) => (Number.isFinite(value) ? (value / baseGld) * 100 - 100 : null))
+            : [];
           const labels = orderedDates.map((date) => formatISODate(date));
 
           new Chart(document.getElementById('retChart'), {
@@ -260,6 +269,14 @@
                   label: 'BRK',
                   data: brkRet,
                   borderColor: '#c28f43',
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  tension: 0.25
+                },
+                {
+                  label: 'GLD',
+                  data: gldRet,
+                  borderColor: '#7c5b2f',
                   borderWidth: 2,
                   pointRadius: 0,
                   tension: 0.25
