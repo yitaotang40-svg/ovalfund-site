@@ -210,6 +210,17 @@ function formatMoney(value) {
   return `$${value.toFixed(2)}`;
 }
 
+function formatNumber(value, digits = 2) {
+  if (!Number.isFinite(value)) {
+    return '—';
+  }
+
+  return Number(value).toLocaleString('en-US', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+}
+
 function computeMaxDrawdown(indexSeries) {
   let peak = -Infinity;
   let maxDrawdown = 0;
@@ -382,6 +393,85 @@ function renderReturnChart(canvasSelector, labels, fundRet, spRet, brkRet, compa
   });
 }
 
+function renderNavChart(canvasSelector, labels, fundValues, compact = false) {
+  const canvas = q(canvasSelector);
+  if (!canvas || typeof Chart === 'undefined') {
+    return;
+  }
+
+  const chartKey = canvasSelector.replace(/[^a-z0-9]/gi, '');
+  if (!window.__ovalCharts) {
+    window.__ovalCharts = {};
+  }
+  if (window.__ovalCharts[chartKey]) {
+    window.__ovalCharts[chartKey].destroy();
+  }
+
+  const styles = getComputedStyle(document.documentElement);
+  const accent = styles.getPropertyValue('--accent').trim() || '#133a66';
+
+  window.__ovalCharts[chartKey] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Fund NAV',
+          data: fundValues,
+          borderColor: accent,
+          backgroundColor: 'transparent',
+          borderWidth: 2.6,
+          pointRadius: 0,
+          tension: 0.28
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: compact ? 12 : 14,
+            color: '#3b4756'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return `${context.dataset.label}: $${formatNumber(context.parsed.y)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: compact ? 5 : 8,
+            color: '#66707d'
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          ticks: {
+            color: '#66707d',
+            callback(value) {
+              return `$${formatNumber(Number(value))}`;
+            }
+          },
+          grid: {
+            color: 'rgba(16, 24, 32, 0.08)'
+          }
+        }
+      }
+    }
+  });
+}
+
 async function loadHomePerformance() {
   const needsPerformance =
     q('#perfMini') ||
@@ -492,7 +582,7 @@ async function loadHomePerformance() {
     const spRet = spIndex.map((value) => value - 100);
     const brkRet = brkIndex.map((value) => value - 100);
     renderReturnChart('#perfMini', labels, fundRet, spRet, brkRet, true);
-    renderReturnChart('#perfHomeChart', labels, fundRet, spRet, brkRet, false);
+    renderNavChart('#perfHomeChart', labels, orderedFund, false);
   } catch (error) {
     console.error(error);
     fillField('data-perf-status', '业绩数据暂时不可用');
@@ -508,6 +598,7 @@ window.OvalSite = {
   formatDateCN,
   formatPct,
   formatMoney,
+  formatNumber,
   computeMaxDrawdown,
   returnOverDays,
   returnYearToDate
