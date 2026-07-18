@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>主要持仓 | Oval Fund</title>
+  <meta
+    name="description"
+    content="查看 Oval Fund 主要持仓标的的日线 K 线、成交量与区间价格表现。"
+  />
+  <meta name="theme-color" content="#ffffff" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Oval Fund" />
+  <meta property="og:title" content="主要持仓 | Oval Fund" />
+  <meta property="og:description" content="主要持仓标的的日线 K 线与成交量。" />
+  <meta property="og:image" content="https://yitaotang40-svg.github.io/ovalfund-site/assets/img/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body data-page="holding">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="container nav-shell">
+      <a class="brand" href="index.html" aria-label="Oval Fund 首页">
+        <span class="brand-symbol" aria-hidden="true">O</span>
+        <span class="brand-name">Oval Fund</span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航">
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="主要导航">
+        <a href="index.html#approach">方法</a>
+        <a href="performance.html">业绩</a>
+        <a class="active" href="index.html#holdings">持仓</a>
+        <a href="index.html#terms">条款</a>
+        <a href="index.html#team">团队</a>
+        <a href="index.html#contact">联系</a>
+        <a class="nav-action" href="index.html">返回首页 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="holding-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="面包屑导航">
+          <a href="index.html#holdings">主要持仓</a>
+          <span aria-hidden="true">/</span>
+          <span data-holding-symbol>—</span>
+        </nav>
+
+        <div class="holding-hero-grid">
+          <div data-reveal>
+            <p class="eyebrow">Position detail</p>
+            <h1>
+              <span data-holding-name>正在读取标的信息</span>
+              <small data-holding-symbol>—</small>
+            </h1>
+            <div class="holding-tags">
+              <span data-holding-category>—</span>
+              <span data-holding-exchange>—</span>
+              <span>USD</span>
+            </div>
+          </div>
+
+          <div class="quote-snapshot" data-reveal>
+            <span>最新收盘</span>
+            <strong data-holding-close>—</strong>
+            <div>
+              <span data-holding-change>—</span>
+              <time data-holding-date>—</time>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="holding-chart-section">
+      <div class="container holding-chart-shell" data-reveal>
+        <div class="holding-chart-toolbar">
+          <div class="ohlc-strip" aria-label="当前 K 线数据">
+            <span>O <strong data-chart-open>—</strong></span>
+            <span>H <strong data-chart-high>—</strong></span>
+            <span>L <strong data-chart-low>—</strong></span>
+            <span>C <strong data-chart-close>—</strong></span>
+            <span>V <strong data-chart-volume>—</strong></span>
+          </div>
+
+          <div class="range-control holding-range" role="group" aria-label="选择 K 线时间区间">
+            <button type="button" data-holding-range="30">1M</button>
+            <button type="button" data-holding-range="90">3M</button>
+            <button type="button" data-holding-range="180">6M</button>
+            <button class="active" type="button" data-holding-range="all">1Y</button>
+          </div>
+        </div>
+
+        <div class="candlestick-chart" id="holdingChart" role="img" aria-label="日线 K 线与成交量">
+          <p class="chart-loading" data-holding-status>正在读取行情数据</p>
+        </div>
+
+        <div class="holding-chart-footer">
+          <span>日线数据截至 <time data-holding-date>—</time></span>
+          <a data-holding-source href="https://www.nasdaq.com/" target="_blank" rel="noreferrer">Nasdaq 数据源 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-muted holding-switch-section">
+      <div class="container section-heading" data-reveal>
+        <div>
+          <p class="eyebrow">Major holdings</p>
+          <h2>当前主要持仓。</h2>
+        </div>
+        <p>主要持仓仅代表当前披露标的，不代表完整组合、固定权重或未来持仓承诺。</p>
+      </div>
+      <div class="container holding-switcher" data-holding-switcher aria-label="切换主要持仓"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">Oval Fund</div>
+      <p>
+        本站内容仅用于一般信息交流，不构成证券出售要约、购买邀请、收益承诺或投资建议。
+        持仓可能随时变化，行情数据可能延迟或后续修正。
+      </p>
+      <span>© <span data-year></span></span>
+    </div>
+  </footer>
+
+  <script src="assets/vendor/lightweight-charts.standalone.production.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

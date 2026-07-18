@@ -680,10 +680,418 @@ async function initializePerformance() {
   }
 }
 
+async function loadJSON(path) {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Unable to load ${path}: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+function formatHoldingPrice(value) {
+  if (!Number.isFinite(value)) {
+    return '—';
+  }
+  return `$${value.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function formatHoldingDate(value) {
+  return value ? value.replaceAll('-', '.') : '—';
+}
+
+function formatVolume(value) {
+  if (!Number.isFinite(value)) {
+    return '—';
+  }
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(value);
+}
+
+function returnClass(value) {
+  if (value > 0) {
+    return 'positive';
+  }
+  if (value < 0) {
+    return 'negative';
+  }
+  return '';
+}
+
+function holdingSnapshot(dataset) {
+  const bars = dataset.bars;
+  const latest = bars.at(-1);
+  const previous = bars.at(-2);
+  return {
+    latest,
+    dailyReturn: previous ? latest.close / previous.close - 1 : Number.NaN,
+    periodReturn: bars.length > 1 ? latest.close / bars[0].close - 1 : Number.NaN
+  };
+}
+
+function createHoldingCard(holding, dataset) {
+  const snapshot = holdingSnapshot(dataset);
+  const card = document.createElement('a');
+  card.className = 'holding-card';
+  card.href = `holding.html?symbol=${encodeURIComponent(holding.symbol)}`;
+  card.style.setProperty('--holding-accent', holding.accent || COLORS.green);
+  card.setAttribute('aria-label', `${holding.name} (${holding.symbol}) 日线 K 线`);
+
+  const top = document.createElement('div');
+  top.className = 'holding-card-top';
+
+  const ticker = document.createElement('span');
+  ticker.className = 'holding-card-ticker';
+  ticker.textContent = holding.symbol;
+
+  const category = document.createElement('span');
+  category.textContent = `${holding.category} / ${holding.exchange}`;
+
+  const arrow = document.createElement('span');
+  arrow.className = 'holding-card-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.textContent = '↗';
+
+  top.append(ticker, category, arrow);
+
+  const name = document.createElement('h3');
+  name.textContent = holding.name;
+
+  const quote = document.createElement('div');
+  quote.className = 'holding-card-quote';
+
+  const price = document.createElement('strong');
+  price.textContent = formatHoldingPrice(snapshot.latest.close);
+
+  const periodReturn = document.createElement('span');
+  periodReturn.className = `holding-card-return ${returnClass(snapshot.periodReturn)}`.trim();
+  periodReturn.textContent = formatPct(snapshot.periodReturn);
+
+  quote.append(price, periodReturn);
+
+  const footer = document.createElement('div');
+  footer.className = 'holding-card-footer';
+  const date = document.createElement('span');
+  date.textContent = `收盘于 ${formatHoldingDate(snapshot.latest.time)}`;
+  const period = document.createElement('span');
+  period.textContent = '近一年';
+  footer.append(date, period);
+
+  card.append(top, name, quote, footer);
+  return card;
+}
+
+async function renderHomeHoldings(holdings) {
+  const list = query('[data-holdings-list]');
+  if (!list) {
+    return;
+  }
+
+  const results = await Promise.allSettled(
+    holdings.map(async (holding) => ({ holding, dataset: await loadJSON(holding.data) }))
+  );
+  list.replaceChildren();
+
+  results.forEach((result) => {
+    if (result.status === 'fulfilled' && result.value.dataset?.bars?.length > 1) {
+      list.append(createHoldingCard(result.value.holding, result.value.dataset));
+    }
+  });
+
+  if (!list.children.length) {
+    const message = document.createElement('p');
+    message.className = 'data-loading';
+    message.textContent = '持仓数据暂时无法读取';
+    list.append(message);
+  }
+}
+
+function renderHoldingSwitcher(holdings, activeSymbol) {
+  const switcher = query('[data-holding-switcher]');
+  if (!switcher) {
+    return;
+  }
+
+  switcher.replaceChildren();
+  holdings.forEach((holding) => {
+    const link = document.createElement('a');
+    link.className = `holding-switch-link${holding.symbol === activeSymbol ? ' active' : ''}`;
+    link.href = `holding.html?symbol=${encodeURIComponent(holding.symbol)}`;
+
+    const symbol = document.createElement('strong');
+    symbol.textContent = holding.symbol;
+    const name = document.createElement('span');
+    name.textContent = holding.name;
+    const arrow = document.createElement('i');
+    arrow.setAttribute('aria-hidden', 'true');
+    arrow.textContent = holding.symbol === activeSymbol ? '•' : '↗';
+
+    link.append(symbol, name, arrow);
+    switcher.append(link);
+  });
+}
+
+function updateHoldingChartFields(bar) {
+  fillFields('data-chart-open', formatHoldingPrice(bar.open));
+  fillFields('data-chart-high', formatHoldingPrice(bar.high));
+  fillFields('data-chart-low', formatHoldingPrice(bar.low));
+  fillFields('data-chart-close', formatHoldingPrice(bar.close));
+  fillFields('data-chart-volume', formatVolume(bar.volume));
+}
+
+function holdingRangeStart(bars, days) {
+  if (days === 'all') {
+    return bars[0].time;
+  }
+
+  const cutoff = new Date(`${bars.at(-1).time}T00:00:00Z`).getTime() - Number(days) * DAY_MS;
+  const match = bars.find((bar) => new Date(`${bar.time}T00:00:00Z`).getTime() >= cutoff);
+  return (match || bars[0]).time;
+}
+
+function createHoldingChart(bars) {
+  const container = query('#holdingChart');
+  const status = query('[data-holding-status]');
+  if (!container) {
+    return;
+  }
+
+  if (typeof LightweightCharts === 'undefined') {
+    if (status) {
+      status.textContent = 'K 线组件暂时无法加载';
+    }
+    return;
+  }
+
+  container.replaceChildren();
+  const chart = LightweightCharts.createChart(container, {
+    width: container.clientWidth,
+    height: container.clientHeight,
+    layout: {
+      background: { type: LightweightCharts.ColorType.Solid, color: '#ffffff' },
+      textColor: COLORS.muted,
+      fontFamily: getComputedStyle(document.body).fontFamily,
+      attributionLogo: false
+    },
+    grid: {
+      vertLines: { color: 'rgba(19, 22, 28, 0.045)' },
+      horzLines: { color: 'rgba(19, 22, 28, 0.07)' }
+    },
+    crosshair: {
+      mode: LightweightCharts.CrosshairMode.Normal,
+      vertLine: { color: 'rgba(36, 87, 214, 0.35)', labelBackgroundColor: COLORS.ink },
+      horzLine: { color: 'rgba(36, 87, 214, 0.35)', labelBackgroundColor: COLORS.ink }
+    },
+    rightPriceScale: {
+      borderColor: COLORS.line,
+      scaleMargins: { top: 0.08, bottom: 0.25 }
+    },
+    timeScale: {
+      borderColor: COLORS.line,
+      rightOffset: 4,
+      barSpacing: 7,
+      minBarSpacing: 2.5,
+      fixLeftEdge: true,
+      fixRightEdge: true
+    },
+    handleScale: {
+      axisPressedMouseMove: true,
+      mouseWheel: true,
+      pinch: true
+    },
+    handleScroll: {
+      horzTouchDrag: true,
+      mouseWheel: true,
+      pressedMouseMove: true
+    }
+  });
+
+  const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+    upColor: COLORS.green,
+    downColor: COLORS.red,
+    borderVisible: false,
+    wickUpColor: COLORS.green,
+    wickDownColor: COLORS.red,
+    priceLineVisible: false
+  });
+
+  const volumeSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
+    priceFormat: { type: 'volume' },
+    priceScaleId: 'volume',
+    priceLineVisible: false,
+    lastValueVisible: false
+  });
+
+  chart.priceScale('volume').applyOptions({
+    borderVisible: false,
+    scaleMargins: { top: 0.78, bottom: 0 }
+  });
+
+  candleSeries.setData(
+    bars.map(({ time, open, high, low, close }) => ({ time, open, high, low, close }))
+  );
+  volumeSeries.setData(
+    bars.map(({ time, volume, open, close }) => ({
+      time,
+      value: volume,
+      color: close >= open ? 'rgba(36, 87, 214, 0.34)' : 'rgba(194, 73, 77, 0.30)'
+    }))
+  );
+
+  const barsByTime = new Map(bars.map((bar) => [bar.time, bar]));
+  const showLatest = () => updateHoldingChartFields(bars.at(-1));
+  showLatest();
+
+  chart.subscribeCrosshairMove((parameter) => {
+    if (!parameter.time) {
+      showLatest();
+      return;
+    }
+
+    const key = typeof parameter.time === 'string'
+      ? parameter.time
+      : `${parameter.time.year}-${String(parameter.time.month).padStart(2, '0')}-${String(parameter.time.day).padStart(2, '0')}`;
+    const bar = barsByTime.get(key);
+    if (bar) {
+      updateHoldingChartFields(bar);
+    }
+  });
+
+  let activeRange = 'all';
+  const setRange = (range) => {
+    activeRange = range;
+    if (range === 'all') {
+      chart.timeScale().fitContent();
+      return;
+    }
+    chart.timeScale().setVisibleRange({
+      from: holdingRangeStart(bars, range),
+      to: bars.at(-1).time
+    });
+  };
+
+  const rangeButtons = queryAll('[data-holding-range]');
+  rangeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      rangeButtons.forEach((item) => item.classList.toggle('active', item === button));
+      setRange(button.dataset.holdingRange);
+    });
+  });
+
+  chart.timeScale().fitContent();
+
+  const resizeObserver = new ResizeObserver(() => {
+    chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+    setRange(activeRange);
+  });
+  resizeObserver.observe(container);
+}
+
+function renderHoldingError(message) {
+  const main = query('#main-content');
+  if (!main) {
+    return;
+  }
+  main.innerHTML = '';
+  const section = document.createElement('section');
+  section.className = 'section';
+  const content = document.createElement('div');
+  content.className = 'container holding-error';
+  const title = document.createElement('h1');
+  title.textContent = '无法打开这个标的';
+  const detail = document.createElement('p');
+  detail.textContent = message;
+  const link = document.createElement('a');
+  link.className = 'text-link';
+  link.href = 'index.html#holdings';
+  link.textContent = '返回主要持仓';
+  content.append(title, detail, link);
+  section.append(content);
+  main.append(section);
+}
+
+async function renderHoldingDetail(holdings) {
+  if (document.body.dataset.page !== 'holding') {
+    return;
+  }
+
+  const requested = new URLSearchParams(window.location.search).get('symbol');
+  const symbol = (requested || holdings[0]?.symbol || '').toUpperCase();
+  const holding = holdings.find((item) => item.symbol === symbol);
+  if (!holding) {
+    renderHoldingError('该标的不在当前主要持仓清单中。');
+    return;
+  }
+
+  renderHoldingSwitcher(holdings, symbol);
+  const dataset = await loadJSON(holding.data);
+  if (!Array.isArray(dataset.bars) || dataset.bars.length < 2) {
+    throw new Error(`${symbol}: insufficient OHLC data`);
+  }
+
+  const snapshot = holdingSnapshot(dataset);
+  const changeAmount = snapshot.latest.close - dataset.bars.at(-2).close;
+  const changeText = `${changeAmount > 0 ? '+' : ''}${changeAmount.toFixed(2)} (${formatPct(snapshot.dailyReturn)})`;
+
+  document.title = `${holding.shortName} (${holding.symbol}) K线 | Oval Fund`;
+  fillFields('data-holding-symbol', holding.symbol);
+  fillFields('data-holding-name', holding.name);
+  fillFields('data-holding-category', holding.category);
+  fillFields('data-holding-exchange', holding.exchange);
+  fillFields('data-holding-close', formatHoldingPrice(snapshot.latest.close));
+  fillFields('data-holding-change', changeText);
+  fillFields('data-holding-date', formatHoldingDate(snapshot.latest.time));
+
+  queryAll('[data-holding-change]').forEach((element) => {
+    element.className = `quote-change ${returnClass(snapshot.dailyReturn)}`.trim();
+  });
+
+  const source = query('[data-holding-source]');
+  if (source) {
+    source.href = dataset.sourceUrl || holding.sourceUrl;
+  }
+
+  const chart = query('#holdingChart');
+  if (chart) {
+    chart.setAttribute('aria-label', `${holding.name} (${holding.symbol}) 日线 K 线与成交量`);
+  }
+  createHoldingChart(dataset.bars);
+}
+
+async function initializeHoldings() {
+  const needsHoldings = query('[data-holdings-list]') || document.body.dataset.page === 'holding';
+  if (!needsHoldings) {
+    return;
+  }
+
+  try {
+    const config = await loadJSON('data/holdings.json');
+    const holdings = Array.isArray(config.holdings) ? config.holdings : [];
+    if (!holdings.length) {
+      throw new Error('Holdings configuration is empty');
+    }
+    await Promise.all([renderHomeHoldings(holdings), renderHoldingDetail(holdings)]);
+  } catch (error) {
+    console.error(error);
+    if (document.body.dataset.page === 'holding') {
+      renderHoldingError('持仓行情数据暂时无法读取，请稍后再试。');
+    }
+    const list = query('[data-holdings-list]');
+    if (list) {
+      list.innerHTML = '<p class="data-loading">持仓数据暂时无法读取</p>';
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setYear();
   setupNavigation();
   setupActiveNavigation();
   setupReveal();
   initializePerformance();
+  initializeHoldings();
 });

@@ -1,0 +1,28 @@
+{
+  "holdings": [
+    {
+      "symbol": "ADBE",
+      "name": "Adobe Inc.",
+      "shortName": "Adobe",
+      "category": "Software",
+      "exchange": "Nasdaq",
+      "assetClass": "stocks",
+      "currency": "USD",
+      "accent": "#c2494d",
+      "data": "data/holdings/adbe.json",
+      "sourceUrl": "https://www.nasdaq.com/market-activity/stocks/adbe/historical"
+    },
+    {
+      "symbol": "GLD",
+      "name": "SPDR Gold Shares",
+      "shortName": "GLD",
+      "category": "Gold ETF",
+      "exchange": "NYSE Arca",
+      "assetClass": "etf",
+      "currency": "USD",
+      "accent": "#b37b27",
+      "data": "data/holdings/gld.json",
+      "sourceUrl": "https://www.nasdaq.com/market-activity/etf/gld/historical"
+    }
+  ]
+}
