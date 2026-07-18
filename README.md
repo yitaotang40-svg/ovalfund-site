@@ -1,105 +1,47 @@
-# Oval Fund Site (Starter)
+# Oval Fund Website
 
-这是一个 **静态网站模板**，风格参考/借鉴 *Hayden Capital* 那种「极简 + 大留白 + 以 Investor Letters 为核心」的基金/投资机构官网结构。
+Oval Fund 的公开网站，部署在 GitHub Pages：
 
-> 你可以把它当作可直接部署到 GitHub Pages 的“骨架”，然后把文字、业绩数据、PDF 信件替换成你的真实内容。
+https://yitaotang40-svg.github.io/ovalfund-site/
 
----
+## 页面
 
-## 目录结构
+- `index.html`：基金定位、投资方法、业绩概览、风险、条款、团队与联系信息
+- `performance.html`：累计收益、回撤、区间切换与近期净值表
+- `data/performance.csv`：网站唯一的业绩数据源
 
-```
-ovalfund-site/
-  index.html
-  performance.html
-  assets/
-    css/styles.css
-    js/site.js
-    img/letter-placeholder.svg
-  data/performance.json
-  content/letters.json
-  letters/   <-- 把你的 PDF 放这里
+## 更新业绩
+
+在 `data/performance.csv` 末尾追加一行：
+
+```csv
+Date,Share Price,SP500,BRK,GLD
+2026-07-18,130.83,7457.69,480.46,368.41
 ```
 
----
+页面会自动计算并更新：
 
-## 1) 部署到 GitHub Pages（最简单）
+- 最新单位净值
+- 成立以来收益
+- 年内收益与近 3 个月收益
+- 最大回撤
+- S&P 500 与 GLD 基准对比
+- 近期净值表
 
-1. 在 GitHub 新建一个仓库（比如：`ovalfund-site`）
-2. 把本项目文件上传到仓库根目录（`index.html` 必须在根目录）
-3. 进入 **Settings → Pages**
-4. Source 选择 **Deploy from a branch**
-5. Branch 选择 **main / root**，保存
-6. 等待生成，你的网站会在：
-   - `https://你的用户名.github.io/ovalfund-site/`
+`BRK` 列为历史数据兼容保留，当前公开图表不展示该基准。
 
-如果你希望是 `https://你的用户名.github.io/`（根域名），仓库名需要是 `你的用户名.github.io`
+## 本地预览
 
----
+在仓库目录启动任意静态文件服务器，例如：
 
-## 2) 更新业绩曲线
-
-打开 `data/performance.json`，格式如下：
-
-```json
-{
-  "base": 100,
-  "series": [
-    { "date": "2026-01-01", "fund": 101.23, "sp500": 100.56, "brk": 99.88 }
-  ]
-}
+```bash
+python3 -m http.server 8000
 ```
 
-注意：
-- `fund/sp500/brk` 都是 **Base=100 的净值**（不是百分比）。
-- 网站会自动换算成 %（累计收益率）来画图。
+然后访问 `http://localhost:8000/`。
 
----
+## 内容边界
 
-## 3) 更新投资人信（Letters）
+网站只保留当前真实可用内容。投资人信、PDF 材料和公开表单在有实际文件或服务前不加入页面。
 
-把 PDF 放进 `letters/`，然后编辑 `content/letters.json` 增加一条记录：
-
-```json
-{
-  "year": 2026,
-  "quarter": "Q1",
-  "title": "2026 | Q1 Letter to Partners",
-  "date": "2026-02-15",
-  "pdfUrl": "letters/2026-q1-letter.pdf",
-  "coverUrl": "assets/img/letter-placeholder.svg",
-  "summary": "Portfolio update..."
-}
-```
-
----
-
-## 4) 联系表单
-
-模板里用了 Formspree 的写法：
-
-```html
-<form action="https://formspree.io/f/yourFormId" method="POST">
-```
-
-你需要：
-1. 注册 Formspree
-2. 新建一个 form，拿到 endpoint
-3. 把 `yourFormId` 换成你的真实 ID
-
-也可以改成 Netlify Forms / Google Forms 等。
-
----
-
-## 5) 自定义域名（可选）
-
-如果你有自己的域名，例如 `ovalfund.com`：
-1. 在仓库根目录新增文件 `CNAME`
-2. 内容写你的域名：`ovalfund.com`
-3. 在域名 DNS 配置指向 GitHub Pages
-
----
-
-## 免责声明
-
-本模板仅用于网站搭建示例；你用于对外展示时，请根据所在司法辖区咨询专业合规/律师，尤其是涉及“基金/募资/业绩宣传”的表述与范围。
+本项目为静态 HTML、CSS 与 JavaScript，不需要构建步骤。

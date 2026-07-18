@@ -3,362 +3,233 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oval Fund | Performance Dashboard</title>
+  <title>业绩与回撤 | Oval Fund</title>
   <meta
     name="description"
-    content="Oval Fund performance dashboard showing the main cumulative return curve and core summary statistics sourced from performance.csv, including GLD."
+    content="Oval Fund 最新单位净值、累计收益、市场基准对比、最大回撤与近期净值记录。"
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <meta name="theme-color" content="#ffffff" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Oval Fund" />
+  <meta property="og:title" content="业绩与回撤 | Oval Fund" />
+  <meta property="og:description" content="查看 Oval Fund 的净值路径、市场基准与风险数据。" />
+  <meta property="og:url" content="https://yitaotang40-svg.github.io/ovalfund-site/performance.html" />
+  <meta property="og:image" content="https://yitaotang40-svg.github.io/ovalfund-site/assets/img/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://yitaotang40-svg.github.io/ovalfund-site/assets/img/og.png" />
+  <link rel="canonical" href="https://yitaotang40-svg.github.io/ovalfund-site/performance.html" />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
-<body class="performance-page">
-  <div class="site-ambient" aria-hidden="true"></div>
+<body data-page="performance">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
 
   <header class="site-header">
-    <div class="container">
-      <div class="navbar">
-        <a class="brand" href="index.html" aria-label="Oval Fund home">
-          <span class="brand-mark">O</span>
-          <span>
-            <strong>Oval Fund</strong>
-            <small>Performance Dashboard</small>
-          </span>
-        </a>
+    <div class="container nav-shell">
+      <a class="brand" href="index.html" aria-label="Oval Fund 首页">
+        <span class="brand-symbol" aria-hidden="true">O</span>
+        <span class="brand-name">Oval Fund</span>
+      </a>
 
-        <nav class="nav-links" aria-label="Primary">
-          <a href="index.html#philosophy">理念</a>
-          <a href="index.html#team">团队</a>
-          <a href="index.html#contact">联系</a>
-          <a class="active" href="performance.html">业绩</a>
-        </nav>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="打开导航">
+        <span></span>
+        <span></span>
+      </button>
 
-        <div class="header-actions">
-          <a class="btn" href="index.html">返回首页</a>
-        </div>
-      </div>
+      <nav class="site-nav" id="site-nav" aria-label="主要导航">
+        <a href="index.html#approach">方法</a>
+        <a class="active" href="performance.html">业绩</a>
+        <a href="index.html#terms">条款</a>
+        <a href="index.html#team">团队</a>
+        <a href="index.html#contact">联系</a>
+        <a class="nav-action" href="index.html">返回首页 <span aria-hidden="true">↗</span></a>
+      </nav>
     </div>
   </header>
 
-  <main>
-    <section class="page-hero">
-      <div class="container page-hero-grid">
-        <div data-reveal>
-          <div class="eyebrow">Performance Dashboard</div>
-          <h1>业绩需要上下文，而不只是单一曲线。</h1>
-          <p class="section-lede">
-            本页直接从 <code>data/performance.csv</code> 读取公开展示数据，同时展示累计收益率、单位净值与核心统计。
-            页面更像一个 investor-ready dashboard，而不是简单嵌一张图。
-          </p>
-
-          <div class="status-pill">
-            <span class="status-dot"></span>
-            <span id="dataStatus">正在加载数据...</span>
-            <span>·</span>
-            <span id="lastDate">—</span>
-          </div>
-
-          <div class="page-actions">
-            <a class="btn primary" href="index.html#contact">索取详细材料</a>
-            <a class="btn" href="index.html">返回首页</a>
+  <main id="main-content">
+    <section class="performance-hero">
+      <div class="container performance-hero-copy" data-reveal>
+        <div>
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> Performance / Risk</p>
+          <h1>业绩与回撤，<br />一起看。</h1>
+        </div>
+        <div class="performance-hero-note">
+          <p>以单位净值记录为基础，对比 Oval Fund、S&amp;P 500 与 GLD 的累计收益路径。</p>
+          <div class="data-status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-perf-status>正在读取最新数据</span>
           </div>
         </div>
+      </div>
 
-        <aside class="glass-card" data-reveal style="padding:28px;">
-          <div class="panel-kicker">Current Snapshot</div>
-
-          <div class="summary-grid">
-            <div class="summary-item">
-              <span>Since Inception</span>
-              <strong id="kpiSince">—</strong>
-            </div>
-            <div class="summary-item">
-              <span>Year to Date</span>
-              <strong id="kpiYtd">—</strong>
-            </div>
-            <div class="summary-item">
-              <span>Approx. 1M</span>
-              <strong id="kpi1m">—</strong>
-            </div>
-            <div class="summary-item">
-              <span>Approx. 3M</span>
-              <strong id="kpi3m">—</strong>
-            </div>
-            <div class="summary-item">
-              <span>Latest NAV</span>
-              <strong id="kpiNav">—</strong>
-            </div>
-            <div class="summary-item">
-              <span>Max Drawdown</span>
-              <strong id="kpiMdd">—</strong>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="summary-note" id="kpiBench">—</div>
-        </aside>
+      <div class="container dashboard-kpis" data-reveal>
+        <div class="dashboard-kpi primary-kpi">
+          <span>最新单位净值</span>
+          <strong data-perf-nav>—</strong>
+          <small data-perf-date>—</small>
+        </div>
+        <div class="dashboard-kpi">
+          <span>成立以来</span>
+          <strong data-perf-since>—</strong>
+          <small>Oval Fund</small>
+        </div>
+        <div class="dashboard-kpi">
+          <span>Year to date</span>
+          <strong data-perf-ytd>—</strong>
+          <small>自然年内</small>
+        </div>
+        <div class="dashboard-kpi">
+          <span>近 3 个月</span>
+          <strong data-perf-quarter>—</strong>
+          <small>约 90 天</small>
+        </div>
+        <div class="dashboard-kpi danger-kpi">
+          <span>最大回撤</span>
+          <strong data-perf-mdd>—</strong>
+          <small>成立以来</small>
+        </div>
       </div>
     </section>
 
-    <section class="section">
-        <div class="container performance-grid">
-          <article class="chart-shell glass-card" data-reveal>
-            <div class="eyebrow">Total Return</div>
-            <h3>累计收益率对比</h3>
-            <p>
-              基于 Base=100 的起始值计算累计收益率（%），便于直接对比 Fund、S&amp;P 500、BRK 与 GLD 的路径差异。
-            </p>
-            <div class="chart-box tall">
-              <canvas id="retChart" aria-label="Total return comparison chart" role="img"></canvas>
-            </div>
-            <div class="fine-print">
-              注：投资有风险，可能损失本金；过往业绩不代表未来表现。本页展示仅用于说明累计收益路径，不构成公开募集材料。
-            </div>
-          </article>
+    <section class="dashboard-section">
+      <div class="container chart-module" data-reveal>
+        <div class="module-header">
+          <div>
+            <p class="eyebrow">Cumulative return</p>
+            <h2>累计收益率</h2>
+          </div>
+          <div class="range-control" role="group" aria-label="选择图表时间区间">
+            <button type="button" data-range="30">1M</button>
+            <button type="button" data-range="90">3M</button>
+            <button type="button" data-range="180">6M</button>
+            <button class="active" type="button" data-range="all">全部</button>
+          </div>
         </div>
-      </section>
+
+        <div class="benchmark-summary" aria-label="所选区间基准表现">
+          <div>
+            <span class="legend-mark fund"></span>
+            <span>Oval Fund</span>
+            <strong data-range-fund>—</strong>
+          </div>
+          <div>
+            <span class="legend-mark sp"></span>
+            <span>S&amp;P 500</span>
+            <strong data-range-sp>—</strong>
+          </div>
+          <div>
+            <span class="legend-mark gld"></span>
+            <span>GLD</span>
+            <strong data-range-gld>—</strong>
+          </div>
+        </div>
+
+        <div class="dashboard-chart-box">
+          <canvas id="performanceReturnChart" role="img" aria-label="累计收益率对比图"></canvas>
+        </div>
+      </div>
+
+      <div class="container chart-module drawdown-module" data-reveal>
+        <div class="module-header">
+          <div>
+            <p class="eyebrow">Drawdown</p>
+            <h2>净值回撤</h2>
+          </div>
+          <p class="module-note">相对此前净值高点</p>
+        </div>
+        <div class="drawdown-chart-box">
+          <canvas id="performanceDrawdownChart" role="img" aria-label="Oval Fund 回撤曲线"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-muted recent-section">
+      <div class="container section-heading" data-reveal>
+        <div>
+          <p class="eyebrow">Recent observations</p>
+          <h2>近期净值记录</h2>
+        </div>
+        <p>最新记录列于前。单期变化按相邻两次净值记录计算。</p>
+      </div>
+
+      <div class="container table-shell" data-reveal>
+        <table class="performance-table">
+          <thead>
+            <tr>
+              <th scope="col">日期</th>
+              <th scope="col">单位净值</th>
+              <th scope="col">单期变化</th>
+              <th scope="col">累计收益</th>
+              <th scope="col">S&amp;P 500</th>
+              <th scope="col">GLD</th>
+            </tr>
+          </thead>
+          <tbody id="recentPerformanceRows">
+            <tr>
+              <td colspan="6">正在读取最新记录</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section methodology-section">
+      <div class="container methodology-grid" data-reveal>
+        <div>
+          <p class="eyebrow">Methodology</p>
+          <h2>数据口径</h2>
+        </div>
+        <div class="methodology-list">
+          <div>
+            <span>收益计算</span>
+            <p>累计收益以首条记录为基准；区间收益以所选区间内第一条可用记录为起点。</p>
+          </div>
+          <div>
+            <span>回撤计算</span>
+            <p>回撤为当期单位净值相对历史最高单位净值的跌幅。</p>
+          </div>
+          <div>
+            <span>数据频率</span>
+            <p>记录按实际更新日期展示，并非固定日频或周频。</p>
+          </div>
+          <div>
+            <span>风险提示</span>
+            <p>数据未经独立审计，可能后续修正；过往业绩不代表未来表现。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-section compact-contact">
+      <div class="container contact-layout" data-reveal>
+        <div>
+          <p class="eyebrow">Questions / Context</p>
+          <h2>需要更完整的业绩背景？</h2>
+        </div>
+        <div class="contact-actions">
+          <a href="mailto:yitao.tang@columbia.edu?subject=Oval%20Fund%20Performance%20Inquiry">
+            yitao.tang@columbia.edu <span aria-hidden="true">↗</span>
+          </a>
+          <p>净值口径、策略背景与风险说明。</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-grid">
-      <div>
-        <strong>Oval Fund</strong>
-      </div>
-      <div>
-        Performance data shown on this page is for presentation purposes only and should be read together with the strategy, liquidity, and risk disclosures.
-      </div>
-      <div>© <span data-year></span> Oval Fund</div>
+      <div class="footer-brand">Oval Fund</div>
+      <p>
+        本页仅用于一般信息交流。投资可能损失部分或全部本金；数据未经独立审计，
+        过往业绩不代表未来表现。
+      </p>
+      <span>© <span data-year></span></span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="assets/js/site.js" defer></script>
-  <script defer>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const Oval = window.OvalSite;
-      const get = (id) => document.getElementById(id);
-
-      if (!Oval || typeof Chart === 'undefined') {
-        get('dataStatus').textContent = '图表资源未成功加载';
-        return;
-      }
-
-      const setStatus = (message) => {
-        get('dataStatus').textContent = message;
-      };
-
-      try {
-        setStatus('正在加载数据...');
-
-        const response = await fetch('data/performance.csv', { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const rows = Oval.parseCSV(await response.text());
-        if (rows.length < 2) {
-          throw new Error('CSV is empty');
-        }
-
-        const headers = rows[0];
-        const idxDate = Oval.findCol(headers, ['Date', '日期']);
-        const idxSharePrice = Oval.findCol(headers, ['Share Price', 'SharePrice', 'NAV', 'Unit Price', '单位净值']);
-        const idxSP = Oval.findCol(headers, ['SP500', 'S&P 500', 'SP 500', 'SPX']);
-        const idxBRK = Oval.findCol(headers, ['BRK', 'BRK.B', 'BRK B']);
-        const idxGLD = Oval.findCol(headers, ['GLD']);
-
-        if ([idxDate, idxSharePrice, idxSP, idxBRK].some((index) => index === -1)) {
-          throw new Error('Missing required columns');
-        }
-
-        const dates = [];
-        const fundPrice = [];
-        const sp = [];
-        const brk = [];
-        const gld = [];
-
-        for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
-          const row = rows[rowIndex];
-          const date = Oval.parseDateValue(row[idxDate]);
-          const fund = Oval.parseNumber(row[idxSharePrice]);
-          const spValue = Oval.parseNumber(row[idxSP]);
-          const brkValue = Oval.parseNumber(row[idxBRK]);
-          const gldValue = idxGLD === -1 ? Number.NaN : Oval.parseNumber(row[idxGLD]);
-
-          if (!date || !Number.isFinite(fund) || !Number.isFinite(spValue) || !Number.isFinite(brkValue)) {
-            continue;
-          }
-
-          dates.push(date);
-          fundPrice.push(fund);
-          sp.push(spValue);
-          brk.push(brkValue);
-          gld.push(Number.isFinite(gldValue) ? gldValue : null);
-        }
-
-        if (dates.length < 2) {
-          throw new Error('Not enough usable rows');
-        }
-
-        const order = dates
-          .map((date, index) => ({ time: date.getTime(), index }))
-          .sort((left, right) => left.time - right.time)
-          .map((item) => item.index);
-
-        const orderedDates = order.map((index) => dates[index]);
-        const orderedFund = order.map((index) => fundPrice[index]);
-        const orderedSp = order.map((index) => sp[index]);
-        const orderedBrk = order.map((index) => brk[index]);
-        const orderedGld = order.map((index) => gld[index]);
-
-        const baseFund = orderedFund[0];
-        const baseSp = orderedSp[0];
-        const baseBrk = orderedBrk[0];
-        const baseGld = orderedGld[0];
-
-        const fundIndex = orderedFund.map((value) => (value / baseFund) * 100);
-        const spIndex = orderedSp.map((value) => (value / baseSp) * 100);
-        const brkIndex = orderedBrk.map((value) => (value / baseBrk) * 100);
-        const gldIndex = Number.isFinite(baseGld)
-          ? orderedGld.map((value) => (Number.isFinite(value) ? (value / baseGld) * 100 : null))
-          : [];
-
-        const fundRet = fundIndex.map((value) => value - 100);
-        const spRet = spIndex.map((value) => value - 100);
-        const brkRet = brkIndex.map((value) => value - 100);
-        const gldRet = gldIndex.map((value) => (Number.isFinite(value) ? value - 100 : null));
-
-        const sinceStart = fundIndex.at(-1) / 100 - 1;
-        const yearToDate = Oval.returnYearToDate(orderedDates, fundIndex);
-        const oneMonth = Oval.returnOverDays(orderedDates, fundIndex, 30);
-        const threeMonths = Oval.returnOverDays(orderedDates, fundIndex, 90);
-        const maxDrawdown = Oval.computeMaxDrawdown(fundIndex);
-        const spSinceStart = spIndex.at(-1) / 100 - 1;
-        const brkSinceStart = brkIndex.at(-1) / 100 - 1;
-        const gldSinceStart = gldIndex.length ? gldIndex.at(-1) / 100 - 1 : Number.NaN;
-
-        get('kpiSince').textContent = Oval.formatPct(sinceStart);
-        get('kpiYtd').textContent = Oval.formatPct(yearToDate);
-        get('kpi1m').textContent = Oval.formatPct(oneMonth);
-        get('kpi3m').textContent = Oval.formatPct(threeMonths);
-        get('kpiNav').textContent = Oval.formatMoney(orderedFund.at(-1));
-        get('kpiMdd').textContent = Oval.formatPct(maxDrawdown);
-        get('kpiBench').textContent =
-          `Benchmark snapshot: Fund ${Oval.formatPct(sinceStart)} · S&P 500 ${Oval.formatPct(spSinceStart)} · BRK ${Oval.formatPct(brkSinceStart)} · GLD ${Oval.formatPct(gldSinceStart)}`;
-
-        const lastDate = orderedDates.at(-1);
-        get('lastDate').textContent = Oval.formatISODate(lastDate);
-        setStatus(`已加载 ${orderedDates.length} 条记录`);
-
-        const styles = getComputedStyle(document.documentElement);
-        const accent = styles.getPropertyValue('--accent').trim() || '#133a66';
-        const accentTwo = styles.getPropertyValue('--accent-2').trim() || '#c28f43';
-        const accentThree = styles.getPropertyValue('--accent-3').trim() || '#7b9ab8';
-        const gridColor = 'rgba(16, 24, 32, 0.08)';
-        const labels = orderedDates.map((date) => Oval.formatISODate(date));
-
-        const sharedOptions = {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top' }
-          },
-          scales: {
-            x: {
-              ticks: { maxTicksLimit: 8, color: '#66707d' },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: '#66707d' },
-              grid: { color: gridColor }
-            }
-          }
-        };
-
-        new Chart(get('retChart'), {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [
-              {
-                label: 'Fund',
-                data: fundRet,
-                borderColor: accent,
-                backgroundColor: 'transparent',
-                borderWidth: 2.4,
-                pointRadius: 0,
-                tension: 0.28
-              },
-              {
-                label: 'S&P 500',
-                data: spRet,
-                borderColor: accentThree,
-                backgroundColor: 'transparent',
-                borderWidth: 2.1,
-                pointRadius: 0,
-                tension: 0.28
-              },
-              {
-                label: 'BRK',
-                data: brkRet,
-                borderColor: accentTwo,
-                backgroundColor: 'transparent',
-                borderWidth: 2.1,
-                pointRadius: 0,
-                tension: 0.28
-              },
-              {
-                label: 'GLD',
-                data: gldRet,
-                borderColor: '#7c5b2f',
-                backgroundColor: 'transparent',
-                borderWidth: 2.1,
-                pointRadius: 0,
-                tension: 0.28
-              }
-            ]
-          },
-          options: {
-            ...sharedOptions,
-            plugins: {
-              ...sharedOptions.plugins,
-              tooltip: {
-                callbacks: {
-                  label(context) {
-                    if (context.dataset.label === 'Fund') {
-                      return `Fund: ${Oval.formatMoney(orderedFund[context.dataIndex])} (${context.parsed.y.toFixed(2)}%)`;
-                    }
-                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
-                  }
-                }
-              }
-            },
-            scales: {
-              ...sharedOptions.scales,
-              y: {
-                ...sharedOptions.scales.y,
-                ticks: {
-                  color: '#66707d',
-                  callback(value) {
-                    return `${Number(value).toFixed(2)}%`;
-                  }
-                }
-              }
-            }
-          }
-        });
-
-      } catch (error) {
-        console.error(error);
-        setStatus('数据加载失败');
-        get('kpiBench').textContent = '无法读取 data/performance.csv，请检查文件路径与列名。';
-      }
-    });
-  </script>
 </body>
 </html>
