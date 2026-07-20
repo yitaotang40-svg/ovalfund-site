@@ -8,8 +8,7 @@ const COLORS = {
   greenFill: 'rgba(36, 87, 214, 0.10)',
   blue: '#2d7d87',
   gold: '#b37b27',
-  red: '#c2494d',
-  redFill: 'rgba(194, 73, 77, 0.12)'
+  red: '#c2494d'
 };
 
 const chartRegistry = new Map();
@@ -558,80 +557,6 @@ function renderPerformanceReturnChart(points, range = 'all') {
   }
 }
 
-function renderDrawdownChart(points) {
-  const canvas = query('#performanceDrawdownChart');
-  if (!canvas) {
-    return;
-  }
-
-  replaceChart('performance-drawdown', canvas, {
-    type: 'line',
-    data: {
-      labels: points.map((point) => formatDateShort(point.date)),
-      datasets: [
-        {
-          label: 'Drawdown',
-          data: drawdownSeries(points).map((value) => value * 100),
-          borderColor: COLORS.red,
-          backgroundColor: COLORS.redFill,
-          fill: true,
-          borderWidth: 1.8,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          tension: 0.14
-        }
-      ]
-    },
-    options: {
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          displayColors: false,
-          callbacks: {
-            label(context) {
-              return `回撤 ${context.parsed.y.toFixed(2)}%`;
-            }
-          }
-        }
-      },
-      scales: baseScales((value) => `${Number(value).toFixed(0)}%`)
-    }
-  });
-}
-
-function renderRecentTable(points) {
-  const body = query('#recentPerformanceRows');
-  if (!body) {
-    return;
-  }
-
-  const rows = points.slice(-8).reverse();
-  const firstFund = points[0].fund;
-
-  body.innerHTML = rows
-    .map((point) => {
-      const originalIndex = points.indexOf(point);
-      const previous = originalIndex > 0 ? points[originalIndex - 1] : null;
-      const change = previous ? point.fund / previous.fund - 1 : Number.NaN;
-      const cumulative = point.fund / firstFund - 1;
-      const changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : '';
-      const cumulativeClass = cumulative > 0 ? 'positive' : cumulative < 0 ? 'negative' : '';
-
-      return `
-        <tr>
-          <td>${formatDate(point.date)}</td>
-          <td>${formatNav(point.fund)}</td>
-          <td class="${changeClass}">${formatPct(change)}</td>
-          <td class="${cumulativeClass}">${formatPct(cumulative)}</td>
-          <td>${point.sp.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
-          <td>${point.gld.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
-        </tr>
-      `;
-    })
-    .join('');
-}
-
 function setupRangeControl(points) {
   const buttons = queryAll('[data-range]');
 
@@ -644,7 +569,7 @@ function setupRangeControl(points) {
 }
 
 async function initializePerformance() {
-  const needsData = query('[data-perf-nav]') || query('#recentPerformanceRows');
+  const needsData = query('[data-perf-nav]');
   if (!needsData) {
     return;
   }
@@ -655,7 +580,6 @@ async function initializePerformance() {
 
     if (!configureCharts()) {
       fillFields('data-perf-status', '数据已加载 · 图表组件暂时不可用');
-      renderRecentTable(points);
       return;
     }
 
@@ -666,17 +590,11 @@ async function initializePerformance() {
 
     if (document.body.dataset.page === 'performance') {
       renderPerformanceReturnChart(points);
-      renderDrawdownChart(points);
-      renderRecentTable(points);
       setupRangeControl(points);
     }
   } catch (error) {
     console.error(error);
     fillFields('data-perf-status', '数据暂时无法读取');
-    const tableBody = query('#recentPerformanceRows');
-    if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="6">数据暂时无法读取，请稍后再试。</td></tr>';
-    }
   }
 }
 

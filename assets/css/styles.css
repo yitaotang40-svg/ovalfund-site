@@ -1051,10 +1051,6 @@ ul:last-child {
   border-bottom: 1px solid var(--line-strong);
 }
 
-.drawdown-module {
-  padding-top: 78px;
-}
-
 .module-header {
   display: flex;
   align-items: flex-end;
@@ -1069,12 +1065,6 @@ ul:last-child {
 
 .module-header h2 {
   font-size: 36px;
-}
-
-.module-note {
-  margin: 0 0 4px;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .range-control {
@@ -1152,70 +1142,6 @@ ul:last-child {
   position: relative;
   width: 100%;
   height: 480px;
-}
-
-.drawdown-chart-box {
-  position: relative;
-  width: 100%;
-  height: 260px;
-}
-
-.recent-section {
-  padding-top: 100px;
-}
-
-.table-shell {
-  overflow-x: auto;
-  border-top: 1px solid var(--line-strong);
-}
-
-.performance-table {
-  width: 100%;
-  min-width: 760px;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-.performance-table th,
-.performance-table td {
-  height: 58px;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--line);
-  text-align: right;
-}
-
-.performance-table th:first-child,
-.performance-table td:first-child {
-  padding-left: 0;
-  text-align: left;
-}
-
-.performance-table th:last-child,
-.performance-table td:last-child {
-  padding-right: 0;
-}
-
-.performance-table th {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.performance-table td {
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-.performance-table tbody tr:hover {
-  background: rgba(36, 87, 214, 0.035);
-}
-
-.performance-table .positive {
-  color: var(--accent);
-}
-
-.performance-table .negative {
-  color: var(--red);
 }
 
 .methodology-section {
@@ -2048,14 +1974,6 @@ ul:last-child {
 
   .dashboard-chart-box {
     height: 330px;
-  }
-
-  .drawdown-module {
-    padding-top: 58px;
-  }
-
-  .drawdown-chart-box {
-    height: 220px;
   }
 
   .methodology-list > div {
