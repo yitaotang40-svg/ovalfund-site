@@ -2,7 +2,7 @@
   "symbol": "GLD",
   "source": "Nasdaq",
   "sourceUrl": "https://www.nasdaq.com/market-activity/etf/gld/historical",
-  "updatedAt": "2026-07-17",
+  "updatedAt": "2026-07-27",
   "bars": [
     {
       "time": "2025-07-11",
@@ -2043,6 +2043,54 @@
       "low": 363.6,
       "close": 368.41,
       "volume": 6456632
+    },
+    {
+      "time": "2026-07-20",
+      "open": 367.79,
+      "high": 368.7893,
+      "low": 366.8,
+      "close": 367.6,
+      "volume": 3922524
+    },
+    {
+      "time": "2026-07-21",
+      "open": 371.7,
+      "high": 375.01,
+      "low": 371.07,
+      "close": 374.81,
+      "volume": 6070621
+    },
+    {
+      "time": "2026-07-22",
+      "open": 379.068,
+      "high": 382.22,
+      "low": 378.83,
+      "close": 379.12,
+      "volume": 7115061
+    },
+    {
+      "time": "2026-07-23",
+      "open": 372.36,
+      "high": 373.0852,
+      "low": 370.53,
+      "close": 371.52,
+      "volume": 9820641
+    },
+    {
+      "time": "2026-07-24",
+      "open": 371.26,
+      "high": 374.49,
+      "low": 371.03,
+      "close": 371.9,
+      "volume": 3852356
+    },
+    {
+      "time": "2026-07-27",
+      "open": 373.89,
+      "high": 375.53,
+      "low": 372.91,
+      "close": 374.63,
+      "volume": 3699961
     }
   ]
 }

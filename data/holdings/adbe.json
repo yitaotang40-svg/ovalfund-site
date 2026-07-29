@@ -2,7 +2,7 @@
   "symbol": "ADBE",
   "source": "Nasdaq",
   "sourceUrl": "https://www.nasdaq.com/market-activity/stocks/adbe/historical",
-  "updatedAt": "2026-07-17",
+  "updatedAt": "2026-07-27",
   "bars": [
     {
       "time": "2025-07-11",
@@ -2051,6 +2051,54 @@
       "low": 232.36,
       "close": 237.25,
       "volume": 7269910
+    },
+    {
+      "time": "2026-07-20",
+      "open": 235.67,
+      "high": 236.66,
+      "low": 227.5,
+      "close": 234.74,
+      "volume": 5123677
+    },
+    {
+      "time": "2026-07-21",
+      "open": 222.85,
+      "high": 231.5,
+      "low": 222.3,
+      "close": 227.16,
+      "volume": 5060612
+    },
+    {
+      "time": "2026-07-22",
+      "open": 229.66,
+      "high": 229.66,
+      "low": 218,
+      "close": 218.36,
+      "volume": 4361285
+    },
+    {
+      "time": "2026-07-23",
+      "open": 222.18,
+      "high": 222.75,
+      "low": 210.875,
+      "close": 212.17,
+      "volume": 4363216
+    },
+    {
+      "time": "2026-07-24",
+      "open": 216.495,
+      "high": 226.93,
+      "low": 216.15,
+      "close": 225.11,
+      "volume": 4719923
+    },
+    {
+      "time": "2026-07-27",
+      "open": 230.39,
+      "high": 242.05,
+      "low": 229.79,
+      "close": 237.75,
+      "volume": 5543598
     }
   ]
 }
