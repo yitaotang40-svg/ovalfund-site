@@ -23,6 +23,19 @@
       "accent": "#b37b27",
       "data": "data/holdings/gld.json",
       "sourceUrl": "https://www.nasdaq.com/market-activity/etf/gld/historical"
+    },
+    {
+      "symbol": "SPCX",
+      "name": "SpaceX",
+      "shortName": "SpaceX",
+      "category": "Aerospace",
+      "exchange": "Nasdaq",
+      "assetClass": "stocks",
+      "currency": "USD",
+      "accent": "#111318",
+      "periodLabel": "上市以来",
+      "data": "data/holdings/spcx.json",
+      "sourceUrl": "https://finance.yahoo.com/quote/SPCX/"
     }
   ]
 }

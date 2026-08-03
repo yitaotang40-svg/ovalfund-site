@@ -696,7 +696,7 @@ function createHoldingCard(holding, dataset) {
   const date = document.createElement('span');
   date.textContent = `收盘于 ${formatHoldingDate(snapshot.latest.time)}`;
   const period = document.createElement('span');
-  period.textContent = '近一年';
+  period.textContent = holding.periodLabel || '近一年';
   footer.append(date, period);
 
   card.append(top, name, quote, footer);
@@ -971,6 +971,11 @@ async function renderHoldingDetail(holdings) {
   const source = query('[data-holding-source]');
   if (source) {
     source.href = dataset.sourceUrl || holding.sourceUrl;
+    const sourceName = dataset.source || holding.source || 'Market';
+    const arrow = document.createElement('span');
+    arrow.setAttribute('aria-hidden', 'true');
+    arrow.textContent = '↗';
+    source.replaceChildren(document.createTextNode(`${sourceName} 数据源 `), arrow);
   }
 
   const chart = query('#holdingChart');
