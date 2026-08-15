@@ -651,13 +651,14 @@ function holdingSnapshot(dataset) {
   };
 }
 
-function createHoldingCard(holding, dataset) {
+function createHoldingCard(holding, dataset, options = {}) {
   const snapshot = holdingSnapshot(dataset);
+  const isRealized = options.realized || holding.status === 'realized';
   const card = document.createElement('a');
-  card.className = 'holding-card';
+  card.className = `holding-card${isRealized ? ' holding-card-realized' : ''}`;
   card.href = `holding.html?symbol=${encodeURIComponent(holding.symbol)}`;
   card.style.setProperty('--holding-accent', holding.accent || COLORS.green);
-  card.setAttribute('aria-label', `${holding.name} (${holding.symbol}) 日线 K 线`);
+  card.setAttribute('aria-label', `${holding.name} (${holding.symbol}) ${isRealized ? '历史' : '日线'} K 线`);
 
   const top = document.createElement('div');
   top.className = 'holding-card-top';
@@ -686,25 +687,30 @@ function createHoldingCard(holding, dataset) {
   price.textContent = formatHoldingPrice(snapshot.latest.close);
 
   const periodReturn = document.createElement('span');
-  periodReturn.className = `holding-card-return ${returnClass(snapshot.periodReturn)}`.trim();
-  periodReturn.textContent = formatPct(snapshot.periodReturn);
+  if (isRealized) {
+    periodReturn.className = 'holding-card-status';
+    periodReturn.textContent = holding.statusLabel || '获利了结';
+  } else {
+    periodReturn.className = `holding-card-return ${returnClass(snapshot.periodReturn)}`.trim();
+    periodReturn.textContent = formatPct(snapshot.periodReturn);
+  }
 
   quote.append(price, periodReturn);
 
   const footer = document.createElement('div');
   footer.className = 'holding-card-footer';
   const date = document.createElement('span');
-  date.textContent = `收盘于 ${formatHoldingDate(snapshot.latest.time)}`;
+  date.textContent = `${isRealized ? '记录截至' : '收盘于'} ${formatHoldingDate(snapshot.latest.time)}`;
   const period = document.createElement('span');
-  period.textContent = holding.periodLabel || '近一年';
+  period.textContent = isRealized ? '历史 K 线' : holding.periodLabel || '近一年';
   footer.append(date, period);
 
   card.append(top, name, quote, footer);
   return card;
 }
 
-async function renderHomeHoldings(holdings) {
-  const list = query('[data-holdings-list]');
+async function renderHomeHoldingList(selector, holdings, options = {}) {
+  const list = query(selector);
   if (!list) {
     return;
   }
@@ -716,14 +722,14 @@ async function renderHomeHoldings(holdings) {
 
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value.dataset?.bars?.length > 1) {
-      list.append(createHoldingCard(result.value.holding, result.value.dataset));
+      list.append(createHoldingCard(result.value.holding, result.value.dataset, options));
     }
   });
 
   if (!list.children.length) {
     const message = document.createElement('p');
     message.className = 'data-loading';
-    message.textContent = '持仓数据暂时无法读取';
+    message.textContent = options.emptyMessage || '持仓数据暂时无法读取';
     list.append(message);
   }
 }
@@ -737,13 +743,14 @@ function renderHoldingSwitcher(holdings, activeSymbol) {
   switcher.replaceChildren();
   holdings.forEach((holding) => {
     const link = document.createElement('a');
-    link.className = `holding-switch-link${holding.symbol === activeSymbol ? ' active' : ''}`;
+    const isRealized = holding.status === 'realized';
+    link.className = `holding-switch-link${holding.symbol === activeSymbol ? ' active' : ''}${isRealized ? ' realized' : ''}`;
     link.href = `holding.html?symbol=${encodeURIComponent(holding.symbol)}`;
 
     const symbol = document.createElement('strong');
     symbol.textContent = holding.symbol;
     const name = document.createElement('span');
-    name.textContent = holding.name;
+    name.textContent = `${holding.name}${isRealized ? ' · 已了结' : ''}`;
     const arrow = document.createElement('i');
     arrow.setAttribute('aria-hidden', 'true');
     arrow.textContent = holding.symbol === activeSymbol ? '•' : '↗';
@@ -926,7 +933,7 @@ function renderHoldingError(message) {
   const link = document.createElement('a');
   link.className = 'text-link';
   link.href = 'index.html#holdings';
-  link.textContent = '返回主要持仓';
+  link.textContent = '返回持仓档案';
   content.append(title, detail, link);
   section.append(content);
   main.append(section);
@@ -941,10 +948,11 @@ async function renderHoldingDetail(holdings) {
   const symbol = (requested || holdings[0]?.symbol || '').toUpperCase();
   const holding = holdings.find((item) => item.symbol === symbol);
   if (!holding) {
-    renderHoldingError('该标的不在当前主要持仓清单中。');
+    renderHoldingError('该标的不在当前或历史持仓清单中。');
     return;
   }
 
+  const isRealized = holding.status === 'realized';
   renderHoldingSwitcher(holdings, symbol);
   const dataset = await loadJSON(holding.data);
   if (!Array.isArray(dataset.bars) || dataset.bars.length < 2) {
@@ -956,10 +964,13 @@ async function renderHoldingDetail(holdings) {
   const changeText = `${changeAmount > 0 ? '+' : ''}${changeAmount.toFixed(2)} (${formatPct(snapshot.dailyReturn)})`;
 
   document.title = `${holding.shortName} (${holding.symbol}) K线 | Oval Fund`;
+  fillFields('data-holding-detail-label', isRealized ? 'Realized position' : 'Position detail');
   fillFields('data-holding-symbol', holding.symbol);
   fillFields('data-holding-name', holding.name);
   fillFields('data-holding-category', holding.category);
   fillFields('data-holding-exchange', holding.exchange);
+  fillFields('data-holding-status', isRealized ? holding.statusLabel || '获利了结' : '当前持仓');
+  fillFields('data-holding-quote-label', isRealized ? '最后记录' : '最新收盘');
   fillFields('data-holding-close', formatHoldingPrice(snapshot.latest.close));
   fillFields('data-holding-change', changeText);
   fillFields('data-holding-date', formatHoldingDate(snapshot.latest.time));
@@ -967,6 +978,16 @@ async function renderHoldingDetail(holdings) {
   queryAll('[data-holding-change]').forEach((element) => {
     element.className = `quote-change ${returnClass(snapshot.dailyReturn)}`.trim();
   });
+
+  queryAll('[data-holding-status]').forEach((element) => {
+    element.className = `holding-position-status${isRealized ? ' realized' : ''}`;
+  });
+
+  const breadcrumb = query('[data-holding-breadcrumb-link]');
+  if (breadcrumb) {
+    breadcrumb.href = isRealized ? 'index.html#realized-holdings' : 'index.html#holdings';
+    breadcrumb.textContent = isRealized ? '获利了结标的' : '主要持仓';
+  }
 
   const source = query('[data-holding-source]');
   if (source) {
@@ -986,7 +1007,7 @@ async function renderHoldingDetail(holdings) {
 }
 
 async function initializeHoldings() {
-  const needsHoldings = query('[data-holdings-list]') || document.body.dataset.page === 'holding';
+  const needsHoldings = query('[data-holdings-list]') || query('[data-realized-holdings-list]') || document.body.dataset.page === 'holding';
   if (!needsHoldings) {
     return;
   }
@@ -994,10 +1015,19 @@ async function initializeHoldings() {
   try {
     const config = await loadJSON('data/holdings.json');
     const holdings = Array.isArray(config.holdings) ? config.holdings : [];
-    if (!holdings.length) {
+    const realizedHoldings = Array.isArray(config.realizedHoldings) ? config.realizedHoldings : [];
+    const allHoldings = [...holdings, ...realizedHoldings];
+    if (!allHoldings.length) {
       throw new Error('Holdings configuration is empty');
     }
-    await Promise.all([renderHomeHoldings(holdings), renderHoldingDetail(holdings)]);
+    await Promise.all([
+      renderHomeHoldingList('[data-holdings-list]', holdings),
+      renderHomeHoldingList('[data-realized-holdings-list]', realizedHoldings, {
+        realized: true,
+        emptyMessage: '暂无获利了结标的'
+      }),
+      renderHoldingDetail(allHoldings)
+    ]);
   } catch (error) {
     console.error(error);
     if (document.body.dataset.page === 'holding') {
@@ -1006,6 +1036,10 @@ async function initializeHoldings() {
     const list = query('[data-holdings-list]');
     if (list) {
       list.innerHTML = '<p class="data-loading">持仓数据暂时无法读取</p>';
+    }
+    const realizedList = query('[data-realized-holdings-list]');
+    if (realizedList) {
+      realizedList.innerHTML = '<p class="data-loading">历史持仓数据暂时无法读取</p>';
     }
   }
 }

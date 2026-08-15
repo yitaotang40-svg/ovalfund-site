@@ -700,6 +700,17 @@ ul:last-child {
   font-weight: 650;
 }
 
+.holding-card-status {
+  color: var(--holding-accent, var(--accent));
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.holding-card-realized {
+  background: color-mix(in srgb, var(--surface) 92%, var(--paper));
+}
+
 .holding-card-return.positive,
 .quote-change.positive {
   color: var(--accent);
@@ -1253,6 +1264,15 @@ ul:last-child {
   content: "";
 }
 
+.holding-position-status {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.holding-position-status.realized {
+  color: var(--accent);
+}
+
 .quote-snapshot {
   padding: 8px 0 8px 42px;
   border-left: 1px solid var(--line-strong);
@@ -1388,6 +1408,10 @@ ul:last-child {
 
 .holding-switch-link.active {
   background: var(--accent-soft);
+}
+
+.holding-switch-link.realized span {
+  color: var(--ink-soft);
 }
 
 .holding-switch-link strong {

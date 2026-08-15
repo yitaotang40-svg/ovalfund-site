@@ -25,6 +25,20 @@
       "sourceUrl": "https://www.nasdaq.com/market-activity/etf/gld/historical"
     },
     {
+      "symbol": "HIMS",
+      "name": "Hims & Hers Health",
+      "shortName": "Hims & Hers",
+      "category": "Digital Health",
+      "exchange": "NYSE",
+      "assetClass": "stocks",
+      "currency": "USD",
+      "accent": "#3a7768",
+      "data": "data/holdings/hims.json",
+      "sourceUrl": "https://www.nasdaq.com/market-activity/stocks/hims/historical"
+    }
+  ],
+  "realizedHoldings": [
+    {
       "symbol": "SPCX",
       "name": "SpaceX",
       "shortName": "SpaceX",
@@ -33,6 +47,9 @@
       "assetClass": "stocks",
       "currency": "USD",
       "accent": "#111318",
+      "status": "realized",
+      "statusLabel": "获利了结",
+      "exitDate": "2026-08-14",
       "periodLabel": "上市以来",
       "data": "data/holdings/spcx.json",
       "sourceUrl": "https://finance.yahoo.com/quote/SPCX/"

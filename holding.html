@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>主要持仓 | Oval Fund</title>
+  <title>持仓档案 | Oval Fund</title>
   <meta
     name="description"
-    content="查看 Oval Fund 主要持仓标的的日线 K 线、成交量与区间价格表现。"
+    content="查看 Oval Fund 当前主要持仓与获利了结标的的日线 K 线、成交量与区间价格表现。"
   />
   <meta name="theme-color" content="#ffffff" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Oval Fund" />
-  <meta property="og:title" content="主要持仓 | Oval Fund" />
-  <meta property="og:description" content="主要持仓标的的日线 K 线与成交量。" />
+  <meta property="og:title" content="持仓档案 | Oval Fund" />
+  <meta property="og:description" content="当前主要持仓与获利了结标的的日线 K 线与成交量。" />
   <meta property="og:image" content="https://yitaotang40-svg.github.io/ovalfund-site/assets/img/og.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="stylesheet" href="assets/css/styles.css" />
@@ -48,14 +48,14 @@
     <section class="holding-hero">
       <div class="container">
         <nav class="breadcrumb" aria-label="面包屑导航">
-          <a href="index.html#holdings">主要持仓</a>
+          <a data-holding-breadcrumb-link href="index.html#holdings">主要持仓</a>
           <span aria-hidden="true">/</span>
           <span data-holding-symbol>—</span>
         </nav>
 
         <div class="holding-hero-grid">
           <div data-reveal>
-            <p class="eyebrow">Position detail</p>
+            <p class="eyebrow" data-holding-detail-label>Position detail</p>
             <h1>
               <span data-holding-name>正在读取标的信息</span>
               <small data-holding-symbol>—</small>
@@ -64,11 +64,12 @@
               <span data-holding-category>—</span>
               <span data-holding-exchange>—</span>
               <span>USD</span>
+              <span class="holding-position-status" data-holding-status>—</span>
             </div>
           </div>
 
           <div class="quote-snapshot" data-reveal>
-            <span>最新收盘</span>
+            <span data-holding-quote-label>最新收盘</span>
             <strong data-holding-close>—</strong>
             <div>
               <span data-holding-change>—</span>
@@ -112,12 +113,12 @@
     <section class="section section-muted holding-switch-section">
       <div class="container section-heading" data-reveal>
         <div>
-          <p class="eyebrow">Major holdings</p>
-          <h2>当前主要持仓。</h2>
+          <p class="eyebrow">Position archive</p>
+          <h2>当前与历史持仓。</h2>
         </div>
-        <p>主要持仓仅代表当前披露标的，不代表完整组合、固定权重或未来持仓承诺。</p>
+        <p>当前主要持仓与已获利了结标的均保留行情记录，不代表完整组合、固定权重或未来持仓承诺。</p>
       </div>
-      <div class="container holding-switcher" data-holding-switcher aria-label="切换主要持仓"></div>
+      <div class="container holding-switcher" data-holding-switcher aria-label="切换披露标的"></div>
     </section>
   </main>
 
