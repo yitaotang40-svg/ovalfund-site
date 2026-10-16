@@ -47,7 +47,7 @@ node scripts/update-holdings-data.mjs
 ```
 
 脚本会读取持仓配置，并从 Nasdaq 更新各标的近一年的日线开盘、最高、最低、收盘与成交量数据。
-首页持仓卡片和 `holding.html?symbol=ADBE` 详情页会自动读取这些文件。
+首页持仓卡片和 `holding.html?symbol=TSM` 详情页会自动读取这些文件。
 
 ## 本地预览
 

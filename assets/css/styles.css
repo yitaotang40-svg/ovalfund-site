@@ -627,6 +627,10 @@ ul:last-child {
   gap: 18px;
 }
 
+[data-holdings-list] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .holding-card {
   position: relative;
   display: grid;
