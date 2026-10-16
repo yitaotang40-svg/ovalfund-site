@@ -15,6 +15,8 @@ https://yitaotang40-svg.github.io/ovalfund-site/
 
 ## 更新业绩
 
+新增记录的 `Share Price` 使用投资表对应日期的每份净值加 2 美元，保留两位小数。日期沿用表内估值日期，`SP500` 和 `GLD` 使用表内同日数据。`BRK` 仅为历史兼容列，未提供同日数据时留空。
+
 在 `data/performance.csv` 末尾追加一行：
 
 ```csv
