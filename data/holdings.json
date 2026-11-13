@@ -11,18 +11,6 @@
       "accent": "#c2494d",
       "data": "data/holdings/tsm.json",
       "sourceUrl": "https://www.nasdaq.com/market-activity/stocks/tsm/historical"
-    },
-    {
-      "symbol": "GLD",
-      "name": "黄金",
-      "shortName": "黄金",
-      "category": "Gold ETF",
-      "exchange": "NYSE Arca",
-      "assetClass": "etf",
-      "currency": "USD",
-      "accent": "#b37b27",
-      "data": "data/holdings/gld.json",
-      "sourceUrl": "https://www.nasdaq.com/market-activity/etf/gld/historical"
     }
   ],
   "realizedHoldings": [
